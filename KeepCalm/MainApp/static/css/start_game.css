@@ -25,11 +25,18 @@
 		right: 0;
 		z-index: -1;
 		pointer-events: none;
+		width: max-content;
+		min-width: 100px;
+		height: 100vh;
 	}
 
 	.svg-wrapper.svg-top-right-container svg {
-		width: 100vw;
 		height: 100vh;
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		width: auto;
+		overflow: visible;
 	}
 
 	.start-game-form {
