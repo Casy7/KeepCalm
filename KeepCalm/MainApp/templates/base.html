@@ -137,6 +137,7 @@
   <!-- CSRF TOKEN  -->
   {% block csrf_token %} {% endblock %}
   
+  {% if page_name != 'start_game' %}
   <nav class="navbar fixed-top navbar-expand-lg">
     <ul class="navbar-nav me-auto mb-lg-0 central-nav-panel">
 
@@ -164,9 +165,7 @@
       {% block nav_items %} {% endblock %}
     </ul>
   </nav>
-
-
-
+  {% endif %}
 
   <!-- __________________________________________ CONTENT __________________________________________ -->
 
@@ -176,12 +175,6 @@
 
   </div>
 
-  <!-- <footer class="text-center text-white">
-    <div class="text-center p-3">
-      Є питання?
-      <a class="text-white" href="#">Напишіть нам!</a>
-    </div>
-  </footer> -->
 </body>
 
 

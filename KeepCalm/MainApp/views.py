@@ -69,7 +69,7 @@ def base_context(request, **args):
 
 class StartGamePage(View):
 	def get(self, request):
-		context = base_context(request, title='Розпочати')
+		context = base_context(request, title='Розпочати', page_name='start_game')
 		return render(request, "start_game.html", context)
 
 
@@ -212,6 +212,13 @@ class SignUp(View):
 
 			context['error'] = 1
 			return render(request, "signup.html", context)
+		
+
+class StartGame(View):
+	def get(self, request):
+		context = base_context(
+				request, title='Нова гра', header='Реєстрація')
+		return render(request, "start_game.html", context)
 
 
 class AjaxEditorSaveChatStructure(View):

@@ -58,3 +58,14 @@ class ChatMember(models.Model):
 			models.UniqueConstraint(fields=['character', 'chat'], name='unique_chat_member')
 		]
 
+
+
+class PlayerSession(models.Model):
+	user_session_code = models.CharField(max_length=80, unique=True)
+	in_game_time = models.IntegerField(default=0)
+
+
+class PlayerSelectedNode(models.Model):
+	player = models.ForeignKey(PlayerSession, on_delete=models.CASCADE)
+	node = models.ForeignKey(ChatOptionNode, on_delete=models.CASCADE)
+
