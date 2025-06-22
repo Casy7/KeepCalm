@@ -59,7 +59,7 @@
 	}
 
 	.start-game-code {
-		font-size: 4vw;
+		font-size: 75px;
 		width: fit-content;
 	}
 
@@ -79,16 +79,16 @@
 	}
 
 	.big-icon {
-		width: 2.5vw;
+		width: 55px;
 	}
 
 	.form-control.code-input {
 		background-color: transparent;
 		border: 1.3px solid black;
 		text-align: center;
-		max-width: 20vw;
+		max-width: 322px;
 		font-family: "Roboto-Bold", "Roboto", "Roboto-Black", Tahoma;
-		font-size: 1.5vw;
+		font-size: 28px;
 		margin-top: 30px;
 		margin-bottom: 30px;
 	}
@@ -98,7 +98,7 @@
 	}
 
 	.start-game-button {
-		font-size: 1.5vw;
+		font-size: 28px;
 		font-family: "Roboto-Bold", "Roboto", "Roboto-Black", Tahoma;
 		border: none;
 		color: black;
@@ -107,4 +107,32 @@
 	.start-game-button:hover {
 		background-color: black;
 		cursor: pointer;
+	}
+
+
+	@media screen and (max-width: 481px) {
+		.start-game-form {
+			width: inherit;
+			max-width: 100%;
+			margin-left: 0;
+		}
+
+		.start-game-code {
+			font-size: 52px;
+		}
+
+		.big-icon {
+			width: 40px;
+		}
+
+		.svg-wrapper.svg-top-right-container svg {
+			width: initial;
+			opacity: 0.4;
+			position: absolute;
+			right: -64px;
+		}
+
+		.form-control.code-input::placeholder {
+			color: black
+		}
 	}

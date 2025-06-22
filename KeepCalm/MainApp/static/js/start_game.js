@@ -1,16 +1,41 @@
 
-
+document.addEventListener("DOMContentLoaded", startLogoGlitch);
 
 document.getElementById("copyCodeButton").addEventListener("click", () => {
 	copyCode();
 });
 
+document.getElementById("startGameCodeInput").addEventListener("input", () => {
+	validateCode();
+});
 
 function copyCode() {
 	let userSessionCode = document.getElementById("startGameCode").innerText;
 	copyTextToClipboard(userSessionCode);
 	warnUser("Copied!", "", "gray");
 }
+
+
+function validateCode() {
+
+	let userSessionCode = document.getElementById("startGameCodeInput").value;
+
+	if (userSessionCode == "#") {
+		document.getElementById("startGameCodeInput").value = "";
+		return;
+	}
+
+	const cleaned = userSessionCode.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+	if (userSessionCode == "") {
+		document.getElementById("startGameCodeInput").value = "";
+		return;
+	}
+
+
+	document.getElementById("startGameCodeInput").value = "#" + cleaned;
+}
+
 
 function startLogoGlitch() {
 	const glitchIds = [
@@ -67,6 +92,3 @@ function startLogoGlitch() {
 
 	glitchCycle();
 }
-
-// Запускаем, когда DOM готов (на всякий случай)
-document.addEventListener("DOMContentLoaded", startLogoGlitch);
