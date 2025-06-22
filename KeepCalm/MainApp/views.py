@@ -9,10 +9,12 @@ from django.contrib.auth.models import AnonymousUser
 from django.views.generic import View
 
 
-from MainApp.models import User, Chat, ChatOptionNode, ChatNodeLink, Character, Message
+from MainApp.models import User, Chat, ChatOptionNode, ChatNodeLink, Character, Message, PlayerSession
 from .code import chat_structure_parser as csp
 
 import json
+import random
+import string
 
 
 def is_user_authenticated(request):
@@ -67,9 +69,19 @@ def base_context(request, **args):
 	return context
 
 
+def generate_unique_code(length=6):
+    chars = string.ascii_uppercase + string.digits
+    while True:
+        code = ''.join(random.choices(chars, k=length))
+        if not PlayerSession.objects.filter(user_session_code=code).exists():
+            return code
+		
+
 class StartGamePage(View):
 	def get(self, request):
 		context = base_context(request, title='Розпочати', page_name='start_game')
+		context["code"] = generate_unique_code()
+		
 		return render(request, "start_game.html", context)
 
 
