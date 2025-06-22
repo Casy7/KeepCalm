@@ -9,7 +9,7 @@
    id="svg1"
    xml:space="preserve"
    inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
-   sodipodi:docname="text_logo copy.svg"
+   sodipodi:docname="text_logo.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -35,13 +35,9 @@
        id="rect1" /></defs><g
      inkscape:label="Шар 1"
      inkscape:groupmode="layer"
-     id="layer1"><text
-       xml:space="preserve"
-       transform="matrix(0.46878719,0,0,0.46878719,-31.916996,-24.430378)"
+     id="layer1"><path
+       style="font-size:96px;line-height:1.25;font-family:'Bebas Neue';-inkscape-font-specification:'Bebas Neue, Normal';white-space:pre"
+       d="m 105.63327,131.28879 h 10.848 l -14.688,-37.248001 14.688,-29.952 h -10.56 l -13.824004,29.28 v -29.28 h -10.56 v 67.200001 h 10.56 v -20.64 l 3.264,-6.144 z m 26.20795,-57.600001 h 18.24 v -9.6 h -28.8 v 67.200001 h 28.8 v -9.6 h -18.24 v -19.68 h 14.496 v -9.600001 h -14.496 z m 35.32801,0 h 18.24 v -9.6 h -28.8 v 67.200001 h 28.8 v -9.6 h -18.24 v -19.68 h 14.496 v -9.600001 h -14.496 z m 40.32,-9.6 h -15.552 v 67.200001 h 10.56 v -25.248 h 4.992 c 10.56,0 15.744,-5.856 15.744,-16.608001 v -8.736 c 0,-10.752 -5.184,-16.608 -15.744,-16.608 z m 0,9.6 c 3.36,0 5.184,1.536 5.184,6.336 v 10.08 c 0,4.8 -1.824,6.336 -5.184,6.336 h -4.992 v -22.752 z m 56.16014,32.544001 v 9.6 c 0,4.8 -2.112,6.528 -5.472,6.528 -3.36,0 -5.472,-1.728 -5.472,-6.528 V 79.544789 c 0,-4.8 2.112,-6.624 5.472,-6.624 3.36,0 5.472,1.824 5.472,6.624 v 7.2 h 9.984 v -6.528 c 0,-10.752 -5.376,-16.896 -15.744,-16.896 -10.368,0 -15.744,6.144 -15.744,16.896 v 34.944001 c 0,10.752 5.376,16.896 15.744,16.896 10.368,0 15.744,-6.144 15.744,-16.896 v -8.928 z m 39.83997,-42.144001 h -15.456 l -10.752,67.200001 h 9.696 l 1.824,-12.192 h 12.96 l 1.824,12.192 h 10.656 z m -8.256,11.904 5.088,33.984001 h -10.176 z m 23.90396,55.296001 h 27.936 v -9.6 h -17.376 V 64.088789 h -10.56 z m 47.13607,-67.200001 h -14.688 v 67.200001 h 9.216 V 83.768789 l 7.872,47.520001 h 9.984 l 7.296,-48.192001 v 48.192001 h 9.984 V 64.088789 h -14.688 l -7.2,47.712001 z"
        id="text1"
-       style="font-size:96px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect1);display:inline"><tspan
-         x="77.697266"
-         y="131.28879"
-         id="tspan3"><tspan
-           style="font-family:'Bebas Neue';-inkscape-font-specification:'Bebas Neue, Normal'"
-           id="tspan2">Keep Calm</tspan></tspan></text></g></svg>
+       transform="matrix(0.46878719,0,0,0.46878719,-31.916996,-24.430378)"
+       aria-label="Keep Calm" /></g></svg>
