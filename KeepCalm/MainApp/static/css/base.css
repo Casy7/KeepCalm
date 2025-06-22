@@ -110,3 +110,12 @@ footer {
 		transform: translateY(10px);
 	}
 }
+
+/* _____________________ Mobile adaptation _____________________ */
+
+
+@media screen and (max-width: 481px) {
+	#warningContainer {
+
+}
+}

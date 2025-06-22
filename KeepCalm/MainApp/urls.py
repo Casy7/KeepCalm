@@ -25,7 +25,7 @@ urlpatterns = [
 
 	path("signin/", SignIn.as_view(), name="login"),
     path("signout/", Logout.as_view(), name="logout"),
-    path("signup/", SignUp.as_view(), name="registration"),
+    path("signup/", SignUp.as_view(), name="signup"),
 	path("start_game/", StartGamePage.as_view(), name="start_game"),
 
     path("", MainChatPage.as_view(), name="chat"),

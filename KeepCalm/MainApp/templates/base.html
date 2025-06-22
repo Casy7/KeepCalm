@@ -136,7 +136,7 @@
   <!-- __________________________________________ NAVBAR __________________________________________ -->
   <!-- CSRF TOKEN  -->
   {% block csrf_token %} {% endblock %}
-  
+
   {% if page_name != 'start_game' %}
   <nav class="navbar fixed-top navbar-expand-lg">
     <ul class="navbar-nav me-auto mb-lg-0 central-nav-panel">
@@ -146,9 +146,9 @@
       </li>
 
       <li class="nav-item desktop {% if page_name == 'signup' %}active-page{% endif %}">
-        <a class="nav-link" href="/signup/">Реєстрація</a>
+        <a class="nav-link" href="{% url 'signup' %}">Реєстрація</a>
       </li>
- 
+
       <li class="nav-item desktop {% if page_name == 'chat' %}active-page{% endif %}">
         <a class="nav-link" href="/">Чат</a>
       </li>
@@ -156,6 +156,11 @@
       <li class="nav-item desktop {% if page_name == 'editor' %}active-page{% endif %}">
         <a class="nav-link" href="/editor/1/">Редактор</a>
       </li>
+
+      <li class="nav-item desktop {% if page_name == 'start_game' %}active-page{% endif %}">
+        <a class="nav-link" href="{% url 'start_game' %}">Початок гри</a>
+      </li>
+
       {% if user.is_superuser %}
       <li class="nav-item desktop">
         <a class="admin-item" href="/admin/">Admin</a>
