@@ -280,29 +280,3 @@ function deleteNodeMessage(target) {
 
 
 
-
-
-
-function warnUser(title, desc) {
-    const container = document.getElementById('warn-container');
-
-    const toast = document.createElement('div');
-    toast.className = 'warn-toast';
-
-    const titleEl = document.createElement('div');
-    titleEl.className = 'warn-title';
-    titleEl.textContent = title;
-
-    const descEl = document.createElement('div');
-    descEl.textContent = desc;
-
-    toast.appendChild(titleEl);
-    toast.appendChild(descEl);
-    container.appendChild(toast);
-
-    // Remove after 4 seconds
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => container.removeChild(toast), 500); // wait for fadeout
-    }, 4000);
-}

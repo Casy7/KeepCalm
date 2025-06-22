@@ -4,7 +4,32 @@
 		justify-content: start;
 		width: 100%;
 		align-items: baseline;
-        background-color: #00000024;
+		background-color: #00000024;
+	}
+
+	body {
+
+		margin: 0;
+		padding: 0;
+		background-color: white;
+		background-image: none;
+		background-repeat: no-repeat;
+		background-position: right bottom;
+		background-size: auto 100vh;
+
+	}
+
+	.svg-top-right-container {
+		position: absolute;
+		top: 0;
+		right: 0;
+		z-index: -1;
+		pointer-events: none;
+	}
+
+	.svg-wrapper.svg-top-right-container svg {
+		width: 100vw;
+		height: 100vh;
 	}
 
 	.start-game-form {
@@ -68,9 +93,9 @@
 		margin-bottom: 30px;
 	}
 
-    .form-control.code-input::placeholder {
-        font-family: "Roboto", "Roboto-Black", Tahoma;
-    }
+	.form-control.code-input::placeholder {
+		font-family: "Roboto", "Roboto-Black", Tahoma;
+	}
 
 	.start-game-button {
 		font-size: 1.5vw;
@@ -79,7 +104,7 @@
 		color: black;
 	}
 
-    .start-game-button:hover {
-        background-color: black;
-        cursor: pointer;
-    }
+	.start-game-button:hover {
+		background-color: black;
+		cursor: pointer;
+	}
