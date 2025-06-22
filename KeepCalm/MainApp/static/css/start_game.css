@@ -28,6 +28,8 @@
 		width: max-content;
 		min-width: 100px;
 		height: 100vh;
+		width: 100vw;
+		overflow-y: hidden;
 	}
 
 	.svg-wrapper.svg-top-right-container svg {
@@ -134,7 +136,7 @@
 
 		.svg-wrapper.svg-top-right-container svg {
 			width: initial;
-			opacity: 0.4;
+			opacity: 0.2;
 			position: absolute;
 			right: -64px;
 		}
