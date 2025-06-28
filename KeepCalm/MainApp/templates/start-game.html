@@ -1,29 +1,24 @@
 {% extends 'base.html' %}
-
 {% load static %}
 
-
-{% block page_styles %}
-<link href="{% static 'css/signin.css' %}" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/form.css' %}" />
-<link rel="stylesheet" href="{% static 'css/start_game.css' %}" />
-<style>
-
-</style>
+{% block csrf_token %}
+{% csrf_token %}
 {% endblock %}
 
+{% block page_styles %}
+<link href="{% static 'css/start-game.css' %}" rel="stylesheet"/>
+{% endblock %}
 
 {% block content %}
 
 <div class="svg-wrapper svg-top-right-container">
 	{% load svg_tag %}
-
-	{% inline_svg 'images/full_background_logo.svg' as mysvg %}
-	    {{ mysvg|safe }}
+	{% inline_svg 'images/full_background_logo.svg' as glitch_logo %}
+	{{ glitch_logo|safe }}
 </div>
 
 <div class="start-game-form">
-	<img src="{% static 'images/text_logo.svg' %}" alt="" class="start-game-logo">
+	<img src="{% static 'images/text_logo.svg' %}" alt="" class="start-game-logo" role="presentation">
 	<div class="row start-game-code-row">
 		<h1 class="start-game-code" id="startGameCode">#{{ code }}</h1>
 		<button class="btn btn-outline-secondary copy-code-button" id="copyCodeButton">
@@ -32,13 +27,12 @@
 	</div>
 	<h3 class="start-game-description">Збережіть код, щоб не втратити прогрес</h3>
 	<h3 class="start-game-description">або введіть код, щоб відтворити попередню гру.</h3>
-	<input type="text" id="startGameCodeInput" minlength="6" maxlength="7" placeholder="Введіть код..." class="form-control code-input">
-	<button class="btn btn-outline-secondary start-game-button">Почати гру!</button>
+	<input type="text" id="previousGameSessionCodeInput" minlength="6" maxlength="7" placeholder="Введіть код..." class="form-control code-input">
+	<button class="btn btn-outline-secondary start-game-button" id="startGameButton">Почати гру!</button>
 </div>
+
 {% endblock %}
 
-
-
 {% block page_scripts %}
-<script src="{% static 'js/start_game.js' %}" type="text/javascript"></script>
+<script src="{% static 'js/startGame.js' %}" type="module"></script>
 {% endblock %}

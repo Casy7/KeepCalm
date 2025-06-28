@@ -1,11 +1,20 @@
 
-document.addEventListener("DOMContentLoaded", startLogoGlitch);
+import LocalStorageManager from './localStorageManager.js';
+import { copyTextToClipboard, warnUser, Request } from './base.js';
+
+
 
 document.getElementById("copyCodeButton").addEventListener("click", () => {
 	copyCode();
 });
 
-document.getElementById("startGameCodeInput").addEventListener("input", () => {
+
+document.getElementById("startGameButton").addEventListener("click", () => {
+	startGame();
+});
+
+
+document.getElementById("previousGameSessionCodeInput").addEventListener("input", () => {
 	validateCode();
 });
 
@@ -18,22 +27,38 @@ function copyCode() {
 
 function validateCode() {
 
-	let userSessionCode = document.getElementById("startGameCodeInput").value;
+	const codeInputField = document.getElementById("previousGameSessionCodeInput");
+	let userSessionCode = codeInputField.value;
 
 	if (userSessionCode == "#") {
-		document.getElementById("startGameCodeInput").value = "";
+		codeInputField.value = "";
 		return;
 	}
 
 	const cleaned = userSessionCode.toUpperCase().replace(/[^A-Z0-9]/g, '');
 
 	if (userSessionCode == "") {
-		document.getElementById("startGameCodeInput").value = "";
+		codeInputField.value = "";
 		return;
 	}
 
+	codeInputField.value = "#" + cleaned;
+}
 
-	document.getElementById("startGameCodeInput").value = "#" + cleaned;
+
+async function startGame() {
+	let userPreviousSessionCode = document.getElementById("previousGameSessionCodeInput").value;
+
+	if (userPreviousSessionCode != "") {
+		const rq = new Request({ url: "/check_if_session_exists/", data: { userSessionCode: userPreviousSessionCode } });
+		await rq.send();
+
+		if (rq.result === "success") {
+			console.log("Ура:", rq.recievedData);
+		} else {
+			console.warn("Сдохло.");
+		}
+	}
 }
 
 
@@ -92,3 +117,6 @@ function startLogoGlitch() {
 
 	glitchCycle();
 }
+
+
+document.addEventListener("DOMContentLoaded", startLogoGlitch);

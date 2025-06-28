@@ -77,20 +77,6 @@ def generate_unique_code(length=6):
             return code
 		
 
-class StartGamePage(View):
-	def get(self, request):
-		context = base_context(request, title='Розпочати', page_name='start_game')
-		context["code"] = generate_unique_code()
-		
-		return render(request, "start_game.html", context)
-
-
-class MainChatPage(View):
-	def get(self, request):
-		context = base_context(request, title='Чат: Полярний лис')
-		return render(request, "chat.html", context)
-
-
 def get_messages_in_nodes(chat_id):
 
 	messages_in_nodes = {}
@@ -117,6 +103,21 @@ def get_messages_in_nodes(chat_id):
 		messages_in_nodes[node.id] = messages_txt
 	
 	return messages_in_nodes
+
+
+
+class StartGamePage(View):
+	def get(self, request):
+		context = base_context(request, title='Розпочати', page_name='start_game')
+		context["code"] = generate_unique_code()
+		
+		return render(request, "start-game.html", context)
+
+
+class MainChatPage(View):
+	def get(self, request):
+		context = base_context(request, title='Чат: Полярний лис')
+		return render(request, "chat.html", context)
 
 
 class ChatEditorPage(View):
@@ -240,17 +241,17 @@ class AjaxEditorSaveChatStructure(View):
 		chat_structure = json.loads(chat_structure)
 		chat_structure = csp.ChatStructureAdapter.from_json(chat_id, chat_structure)
 
-		result = {}
+		response = {}
 
 		chat = Chat.objects.get(id=chat_id)
 		new_structure = json.dumps(csp.ChatStructureAdapter.to_json(chat))
 
-		result["updatedStructure"] = new_structure
-		result["messagesInNodes"] = json.dumps(get_messages_in_nodes(chat_id))
-		result["result"] = "success"
+		response["updatedStructure"] = new_structure
+		response["messagesInNodes"] = json.dumps(get_messages_in_nodes(chat_id))
+		response["result"] = "success"
 
 		return HttpResponse(
-			json.dumps(result),
+			json.dumps(response),
 			content_type="application/json"
 		)
 
@@ -278,12 +279,12 @@ class AjaxEditorSaveMessage(View):
 
 		message.save()
 
-		result = {}
-		result["messageId"] = message.id
-		result["result"] = "success"
+		response = {}
+		response["messageId"] = message.id
+		response["result"] = "success"
 
 		return HttpResponse(
-			json.dumps(result),
+			json.dumps(response),
 			content_type="application/json"
 		)
 	
@@ -294,13 +295,31 @@ class AjaxEditorDeleteMessage(View):
 
 		message = Message.objects.get(id=form['messageId'])
 		
-		result = {}
-		result["deletedMessageId"] = message.id
+		response = {}
+		response["deletedMessageId"] = message.id
 		message.delete()
 
-		result["result"] = "success"
+		response["result"] = "success"
 
 		return HttpResponse(
-			json.dumps(result),
+			json.dumps(response),
+			content_type="application/json"
+		)
+	
+
+class AjaxCheckIfUserSessionExists(View):
+	def post(self, request):
+		data = json.loads(request.body)
+		session_code = data['userSessionCode'].replace("#", "")
+
+		response = {}
+		response["userSessionCodeExists"] = False
+		if PlayerSession.objects.filter(user_session_code=session_code).exists():
+			response["userSessionCodeExists"] = True
+
+		response["result"] = "success"
+
+		return HttpResponse(
+			json.dumps(response),
 			content_type="application/json"
 		)

@@ -1,32 +1,16 @@
 
 
 
-function getCookie(name) {
-	var cookieValue = null;
-	if (document.cookie && document.cookie != '') {
-		var cookies = document.cookie.split(';');
-		for (var i = 0; i < cookies.length; i++) {
-			var cookie = jQuery.trim(cookies[i]);
-			// Does this cookie string begin with the name we want?
-			if (cookie.substring(0, name.length + 1) == (name + '=')) {
-				cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-				break;
-			}
-		}
-	}
-	return cookieValue;
-}
-
 
 function attachCSRFToken(xhr) {
 	xhr.setRequestHeader("X-CSRFToken", getCSRFToken());
 }
 
-function getCSRFToken() {
+export function getCSRFToken() {
 	return document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 }
 
-function exists(querySelectorRule) {
+export function exists(querySelectorRule) {
 	var element = document.querySelector(querySelectorRule);
 	return element != null;
 }
@@ -41,28 +25,6 @@ function removeChildrens(parent) {
 	}
 }
 
-function sendDefaultData() {
-
-	let some_data = { "data": "some data" };
-
-	$.ajax({
-		url: "/send_data/",
-		type: 'POST',
-		data: {
-			'data_content': chat_structure_send
-		},
-		beforeSend: function (xhr, settings) {
-			collectCookies(xhr);
-		},
-		success: function a(json) {
-			if (json.result === "success") {
-
-			} else {
-
-			}
-		}
-	});
-}
 
 
 function fallbackCopyTextToClipboard(text) {
@@ -88,7 +50,9 @@ function fallbackCopyTextToClipboard(text) {
 
 	document.body.removeChild(textArea);
 }
-function copyTextToClipboard(text) {
+
+
+export function copyTextToClipboard(text) {
 	if (!navigator.clipboard) {
 		fallbackCopyTextToClipboard(text);
 		return;
@@ -101,7 +65,7 @@ function copyTextToClipboard(text) {
 }
 
 
-function warnUser(title, desc, color="orange", timeout=4000) {
+export function warnUser(title, desc, color="orange", timeout=4000) {
     const container = document.getElementById('warningContainer');
 
     const toast = $(`
@@ -123,3 +87,38 @@ function warnUser(title, desc, color="orange", timeout=4000) {
         setTimeout(() => container.removeChild(toast[0]), 500); // wait for fadeout
     }, timeout);
 }
+
+
+export class Request {
+	constructor({ url, data = {}, method = "POST" }) {
+		this.url = url;
+		this.data = data;
+		this.method = method;
+		this.result = null;
+		this.recievedData = null;
+	}
+
+	async send() {
+		try {
+			const response = await fetch(this.url, {
+				method: this.method,
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRFToken": getCSRFToken(),
+				},
+				body: JSON.stringify(this.data),
+			});
+
+			if (!response.ok) throw new Error(`HTTP ${response.status}`);
+			const json = await response.json();
+
+			this.result = json.result;
+			this.recievedData = json;
+		} catch (error) {
+			console.error("Request error:", error);
+			this.result = "error";
+			this.recievedData = null;
+		}
+	}
+}
+

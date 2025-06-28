@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- GOOGLE SEARCH CONSOLE ID -->
-  <meta name="google-site-verification" content="not yet sucker" />
+  <meta name="google-site-verification" content="go fuck yourself you goofle sucker" />
 
 
 
@@ -29,7 +29,6 @@
 
   <link crossorigin="anonymous" href="{% static 'libs/modules/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
   <script crossorigin="anonymous" src="{% static 'libs/modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-  <!-- <script crossorigin="anonymous" src="{% static 'js/common.js' %}"></script> -->
 
   <link href="{% static 'libs/modules/bootstrap-select/css/bootstrap-select.min.css'%}" rel="stylesheet">
   <style>
@@ -127,9 +126,7 @@
 
   {% block page_style_pre_styles %} {% endblock %}
   {% block page_styles %} {% endblock %}
-  {% block page_style_slot_1 %} {% endblock %}
-  {% block page_style_slot_2 %} {% endblock %}
-  {% block page_style_slot_3 %} {% endblock %}
+
 </head>
 
 <body>
@@ -180,7 +177,9 @@
 
   </div>
 
-  <div id="warningContainer"></div>
+  <div id="warningContainer">
+
+  </div>
 
 
 </body>
@@ -191,11 +190,11 @@
 <!-- __________________________________________ SCRIPTS __________________________________________ -->
 
 
-
+{% if page_name != 'start_game' %}
 <script src="{% static 'js/base.js' %}" type="text/javascript"></script>
+{% endif %}
 
-
+{% block js_data %} {% endblock %}
 {% block page_scripts %} {% endblock %}
-
 
 </html>

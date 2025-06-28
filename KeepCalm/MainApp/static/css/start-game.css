@@ -111,6 +111,8 @@
 		font-family: "Roboto-Bold", "Roboto", "Roboto-Black", Tahoma;
 		border: none;
 		color: black;
+		margin-bottom: 15px;
+
 	}
 
 	.start-game-button:hover {
