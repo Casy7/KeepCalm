@@ -69,3 +69,9 @@ class PlayerSelectedNode(models.Model):
 	player = models.ForeignKey(PlayerSession, on_delete=models.CASCADE)
 	node = models.ForeignKey(ChatOptionNode, on_delete=models.CASCADE)
 
+	class Meta:
+		constraints = [
+			models.UniqueConstraint(fields=['player', 'node'], name='unique_player_selected_node')
+		]
+
+

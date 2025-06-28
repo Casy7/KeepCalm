@@ -3,7 +3,6 @@ import LocalStorageManager from './localStorageManager.js';
 import { copyTextToClipboard, warnUser, Request } from './base.js';
 
 
-
 document.getElementById("copyCodeButton").addEventListener("click", () => {
 	copyCode();
 });
@@ -54,11 +53,26 @@ async function startGame() {
 		await rq.send();
 
 		if (rq.result === "success") {
-			console.log("Ура:", rq.recievedData);
+			if (rq.recievedData.userSessionCodeExists) {
+				loadGame(userPreviousSessionCode);
+			}
+			else {
+				warnUser("Цієї ігрової сесії не знайдено", "", "gray");
+			}
 		} else {
-			console.warn("Сдохло.");
+			console.warn("Щось тут не фуричить.");
 		}
 	}
+	else {
+		loadGame(document.getElementById("startGameCode").innerText.replace(/#/g, ""));
+	}
+}
+
+
+function loadGame(code) {
+
+	LocalStorageManager.set("userSessionCode", code);
+	window.location.href = `/game/${code}/`;
 }
 
 

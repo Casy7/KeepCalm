@@ -18,10 +18,12 @@ from .views import (
 )
 
 urlpatterns = [
-    path("start_game/", StartGamePage.as_view(), name="start_game"),
+    path("", StartGamePage.as_view(), name="start_game"),
 	path("check_if_session_exists/", AjaxCheckIfUserSessionExists.as_view(), name="check_if_session_exists"),
 
-	path("editor/<int:chat_id>/", ChatEditorPage.as_view(), name="start_game"),
+    path("game/<str:session_code>/", MainChatPage.as_view(), name="game_page"),
+
+	path("editor/<int:chat_id>/", ChatEditorPage.as_view(), name="editor"),
 	path("send_chat_structure/<int:chat_id>/", AjaxEditorSaveChatStructure.as_view(), name="send_chat_structure"),
 	path("send_node_message/", AjaxEditorSaveMessage.as_view(), name="send_node_message"),
 	path("delete_node_message/", AjaxEditorDeleteMessage.as_view(), name="delete_node_message"),
@@ -29,9 +31,8 @@ urlpatterns = [
 	path("signin/", SignIn.as_view(), name="login"),
     path("signout/", Logout.as_view(), name="logout"),
     path("signup/", SignUp.as_view(), name="signup"),
-	path("start_game/", StartGamePage.as_view(), name="start_game"),
+	path("chat/", StartGamePage.as_view(), name="start_game"),
 
-    path("", MainChatPage.as_view(), name="chat"),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

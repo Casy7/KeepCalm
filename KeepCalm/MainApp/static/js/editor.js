@@ -1,11 +1,5 @@
-let selectedNode = null;
-let defaultNodeContent = `
-	<textarea class="form-input" df-desc="" name="description"></textarea>
-	`;
-let editor = null;
 
-
-
+import { copyTextToClipboard, warnUser, Request, removeChildrens } from './base.js';
 
 
 
@@ -13,9 +7,6 @@ function sortByTimestamp(arr) {
 	arr.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 	return arr;
 }
-
-
-
 
 
 
@@ -137,7 +128,7 @@ function addNode() {
 
 
 function loadMessagesToEditor(nodeId) {
-	removeChildrens(byId("chatNodeId"));
+	removeChildrens(document.getElementById("chatNodeId"));
 	let messages_list = Object.values(messagesInNodes[parseInt(nodeId)]);
 	let messages = sortByTimestamp(messages_list);
 	for (let i = 0; i < messages.length; i++) {
@@ -162,120 +153,114 @@ function loadMessagesToEditor(nodeId) {
 }
 
 
-function sendChatStructure() {
+async function sendChatStructure() {
 
-	let chat_structure_send = JSON.stringify(editor.export()["drawflow"]);
+	let chatStructureStr = JSON.stringify(editor.export()["drawflow"]);
 
-	$.ajax({
-		url: "/send_chat_structure/" + chatId + "/",
-		type: 'POST',
-		data: {
-			'chat_structure': chat_structure_send
-		},
-		beforeSend: function (xhr) {
-			attachCSRFToken(xhr);
-		},
-		success: function a(json) {
-			if (json.result === "success") {
-				editor.import(JSON.parse(JSON.parse(json.updatedStructure)));
-				messagesInNodes = JSON.parse(json.messagesInNodes);
-				warnUser("Saved!", "");
-				
-			} else {
-			}
-		}
-	});
+	let rqData = {
+		'chatStructure': chatStructureStr
+	}
+
+	const rq = new Request({ url: `/send_chat_structure/${chatId}/`, data: rqData });
+	await rq.send();
+
+	if (rq.result === "success") {
+
+		editor.import(JSON.parse(JSON.parse(rq.updatedStructure)));
+		messagesInNodes = JSON.parse(rq.messagesInNodes);
+		warnUser("Saved!", "");
+
+	} else {
+
+		console.log(rq.result);
+
+	}
 }
 
 
-function sendNodeMessage() {
+async function sendNodeMessage() {
 
 	let messageId = 0;
 	let nodeId = selectedNode.replace("node-", "");
-	let messageText = byId("messageText").value;
-	let senderCharacter = byId("senderCharacter").value;
-	let dateWasWritten = byId("dateWasWritten").value;
-	let timeWasWritten = byId("timeWasWritten").value;
-	let timeSWasWritten = byId("timeSWasWritten").value;
-	let timeMsWasWritten = byId("timeMsWasWritten").value;
+	let messageText = document.getElementById("messageText").value;
+	let senderCharacter = document.getElementById("senderCharacter").value;
+	let dateWasWritten = document.getElementById("dateWasWritten").value;
+	let timeWasWritten = document.getElementById("timeWasWritten").value;
+	let timeSWasWritten = document.getElementById("timeSWasWritten").value;
+	let timeMsWasWritten = document.getElementById("timeMsWasWritten").value;
 
+	let rqData = {
+		'messageId': messageId,
+		'nodeId': nodeId,
+		'messageText': messageText,
+		'senderCharacter': senderCharacter,
+		'dateWasWritten': dateWasWritten,
+		'timeWasWritten': timeWasWritten,
+		'timeSWasWritten': timeSWasWritten,
+		'timeMsWasWritten': timeMsWasWritten
+	}
 
-	$.ajax({
-		url: "/send_node_message/",
-		type: 'POST',
-		data: {
-			'messageId': messageId,
-			'nodeId': nodeId,
-			'messageText': messageText,
-			'senderCharacter': senderCharacter,
-			'dateWasWritten': dateWasWritten,
-			'timeWasWritten': timeWasWritten,
-			'timeSWasWritten': timeSWasWritten,
-			'timeMsWasWritten': timeMsWasWritten
-		},
-		beforeSend: function (xhr) {
-			attachCSRFToken(xhr);
-		},
-		success: function a(json) {
-			if (json.result === "success") {
-				let newMessageId = json.messageId;
-				messagesInNodes[parseInt(nodeId)][parseInt(newMessageId)] = {
-					"id": newMessageId,
-					"text": messageText,
-					"time_was_written": timeWasWritten,
-					"time_sent": timeWasWritten + ":" + timeSWasWritten + ":" + timeMsWasWritten,
-					"timestamp": dateWasWritten + " " + timeWasWritten + ":" + timeSWasWritten + "." + timeMsWasWritten + "+00:00",
-					"was_read": false,
-					"attached_image": "",
-					"username": senderCharacter,
-					"full_name": charactersInfo[senderCharacter]
-				};
-				console.log("success");
-				loadMessagesToEditor(nodeId);
-			} else {
-			}
-		}
-	});
+	const rq = new Request({ url: "/send_node_message/", data: rqData });
+	await rq.send();
+
+	if (rq.result === "success") {
+		let newMessageId = rq.messageId;
+		messagesInNodes[parseInt(nodeId)][parseInt(newMessageId)] = {
+			"id": newMessageId,
+			"text": messageText,
+			"time_was_written": timeWasWritten,
+			"time_sent": timeWasWritten + ":" + timeSWasWritten + ":" + timeMsWasWritten,
+			"timestamp": dateWasWritten + " " + timeWasWritten + ":" + timeSWasWritten + "." + timeMsWasWritten + "+00:00",
+			"was_read": false,
+			"attached_image": "",
+			"username": senderCharacter,
+			"full_name": charactersInfo[senderCharacter]
+		};
+		console.log("success");
+		loadMessagesToEditor(nodeId);
+	} else {
+		console.warn("Не вдалось відправити повідомлення.");
+	}
+
 }
 
-function deleteNodeMessage(target) {
+async function deleteNodeMessage(target) {
+
 	console.log(target);
+	const messageId = target.getAttribute("data-value");
 
-	let messageId = target.getAttribute("data-value");
+	let rqData = {
+		'messageId': messageId
+	}
+	const rq = new Request({ url: "/delete_node_message/", data: rqData });
+	await rq.send();
 
-	$.ajax({
-		url: "/delete_node_message/",
-		type: 'POST',
-		data: {
-			'messageId': messageId,
-		},
-		beforeSend: function (xhr) {
-			attachCSRFToken(xhr);
-		},
-		success: function a(json) {
-			if (json.result === "success") {
-				let deletedMessageId = json.deletedMessageId;
+	if (rq.result === "success") {
 
+		const deletedMessageId = rq.deletedMessageId;
+		const messagesBlock = target.closest('.message-wrapper');
 
-				const messagesBlock = target.closest('.message-wrapper');
-				
-				target.parentNode.remove();
-
-				if (!messagesBlock) return; // если нет — выходим				
-
-				const remaining = messagesBlock.querySelectorAll('.message-content-line');
-				if (remaining.length === 0) {
-					messagesBlock.remove();
-				}
-
-				nodeId = selectedNode.replace("node-", "");
-				delete messagesInNodes[parseInt(nodeId)][parseInt(deletedMessageId)];
-				console.log("success");
-				loadMessagesToEditor(nodeId);
-			} else {
-			}
+		target.parentNode.remove();
+		if (!messagesBlock) {
+			return;
 		}
-	});
+
+		const remaining = messagesBlock.querySelectorAll('.message-content-line');
+		if (remaining.length === 0) {
+			messagesBlock.remove();
+		}
+
+		nodeId = selectedNode.replace("node-", "");
+		delete messagesInNodes[parseInt(nodeId)][parseInt(deletedMessageId)];
+		console.log("success");
+		loadMessagesToEditor(nodeId);
+
+	} else {
+
+		console.warn("Не вдалось видалити повідомлення.");
+
+	}
+
 }
 
 

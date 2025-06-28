@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Chat, ChatOptionNode, ChatNodeLink,
-    Character, Message, ChatMember
+    Character, Message, ChatMember, PlayerSession, PlayerSelectedNode
 )
 
 
@@ -14,9 +14,14 @@ class ChatAdmin(admin.ModelAdmin):
 
 @admin.register(ChatOptionNode)
 class ChatOptionNodeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'chat', 'description', 'pos_x', 'pos_y')
+    list_display = ('id', 'chat_and_description', 'chat', 'pos_x', 'pos_y')
     list_filter = ('chat',)
-    search_fields = ('description',)
+    search_fields = ('description', 'chat__name')
+
+    def chat_and_description(self, obj):
+        return f"{obj.chat.name}: {obj.description}"
+    
+    chat_and_description.short_description = "Chat + Description"
 
 
 @admin.register(ChatNodeLink)
@@ -44,3 +49,23 @@ class ChatMemberAdmin(admin.ModelAdmin):
     list_display = ('id', 'chat', 'character')
     list_filter = ('chat',)
     search_fields = ('character__full_name', 'character__username')
+
+@admin.register(PlayerSession)
+class PlayerSessionAdmin(admin.ModelAdmin):
+    list_display = ('user_session_code', 'in_game_time', 'id')
+    search_fields = ('user_session_code',)
+    ordering = ('-id',)
+    readonly_fields = ('user_session_code',)
+
+
+@admin.register(PlayerSelectedNode)
+class PlayerSelectedNodeAdmin(admin.ModelAdmin):
+    list_display = ('player_user_session_code', 'node_description', 'id')
+    list_filter = ('player', 'node')
+    search_fields = ('player__user_session_code', 'node__id')
+
+    def node_description(self, obj):
+        return f"{obj.node.chat.name}: {obj.node.description}"
+    
+    def player_user_session_code(self, obj):
+        return obj.player.user_session_code

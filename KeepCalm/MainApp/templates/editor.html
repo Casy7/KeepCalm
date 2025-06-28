@@ -88,7 +88,9 @@
 
 
 </div>
+{% endblock %}
 
+{% block js_data %}
 <script>
 
 	let chatId = "{{ chat_id }}";
@@ -102,6 +104,12 @@
 	let messagesInNodes = JSON.parse(`{{ messagesInNodes|safe }}`);
 	let charactersInfo = JSON.parse(`{{ characters_JSON|safe }}`);
 
+	let selectedNode = null;
+	let defaultNodeContent = `
+	<textarea class="form-input" df-desc="" name="description"></textarea>
+	`;
+	let editor = null;
+
 </script>
 {% endblock %}
 
@@ -114,5 +122,5 @@
 
 
 {% block page_scripts %}
-<script src="{% static 'js/editor.js' %}" type="text/javascript"></script>
+<script src="{% static 'js/editor.js' %}" type="module"></script>
 {% endblock %}

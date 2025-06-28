@@ -9,7 +9,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.views.generic import View
 
 
-from MainApp.models import User, Chat, ChatOptionNode, ChatNodeLink, Character, Message, PlayerSession
+from MainApp.models import User, Chat, ChatOptionNode, ChatNodeLink, Character, Message, PlayerSession, PlayerSelectedNode
 from .code import chat_structure_parser as csp
 
 import json
@@ -115,14 +115,49 @@ class StartGamePage(View):
 
 
 class MainChatPage(View):
-	def get(self, request):
-		context = base_context(request, title='Чат: Полярний лис')
+	def get(self, request, session_code):
+		context = base_context(request, title='KeepCalm', page_name='game_page')
+
+		player_session = None
+		if not PlayerSession.objects.filter(user_session_code=session_code).exists():
+			player_session = PlayerSession.objects.create(user_session_code=session_code)
+		else:
+			player_session = PlayerSession.objects.get(user_session_code=session_code)
+
+		chats = Chat.objects.all()
+		player_selected_nodes = PlayerSelectedNode.objects.filter(player=player_session)
+
+		messages = []
+
+		for node in player_selected_nodes:
+
+			node_messages = Message.objects.filter(node=node.node)
+
+			for message in node_messages:
+				msg_dict = {
+					'id': message.id,
+					'chat_id': message.node.chat.id,
+					'node_id': message.node.id,
+					'username': message.user.username,
+					'full_name': message.user.full_name,
+					'text': message.text,
+					'timestamp': str(message.timestamp)
+				}
+
+				messages.append(msg_dict)
+
+		context["messages"] = json.dumps(messages)
+
+		context["chats"] = chats
+		context["player_session"] = player_session
+		context["session_code"] = session_code
+
 		return render(request, "chat.html", context)
 
 
 class ChatEditorPage(View):
 	def get(self, request, chat_id):
-		context = base_context(request, title='Edit')
+		context = base_context(request, title='Edit', page_name='editor')
 		context['chat_id'] = chat_id
 		context['chat_obj'] = Chat.objects.get(id=chat_id)
 		context['title'] = context['chat_obj'].name
@@ -236,8 +271,8 @@ class StartGame(View):
 
 class AjaxEditorSaveChatStructure(View):
 	def post(self, request, chat_id):
-		form = request.POST
-		chat_structure = form['chat_structure']
+		form = json.loads(request.body)
+		chat_structure = form['chatStructure']
 		chat_structure = json.loads(chat_structure)
 		chat_structure = csp.ChatStructureAdapter.from_json(chat_id, chat_structure)
 
@@ -247,7 +282,7 @@ class AjaxEditorSaveChatStructure(View):
 		new_structure = json.dumps(csp.ChatStructureAdapter.to_json(chat))
 
 		response["updatedStructure"] = new_structure
-		response["messagesInNodes"] = json.dumps(get_messages_in_nodes(chat_id))
+		response["messagesInNodes"] = get_messages_in_nodes(chat_id)
 		response["result"] = "success"
 
 		return HttpResponse(
@@ -258,11 +293,11 @@ class AjaxEditorSaveChatStructure(View):
 
 class AjaxEditorSaveMessage(View):
 	def post(self, request):
-		form = request.POST
+		form = json.loads(request.body)
 
 		message = None
 
-		if form['messageId'] == '0':
+		if form['messageId'] == 0:
 			message = Message.objects.create(
 				node=ChatOptionNode.objects.get(id=form['nodeId']),
 				user=Character.objects.filter(username=form['senderCharacter'])[0]
@@ -291,7 +326,7 @@ class AjaxEditorSaveMessage(View):
 
 class AjaxEditorDeleteMessage(View):
 	def post(self, request):
-		form = request.POST
+		form = json.loads(request.body)
 
 		message = Message.objects.get(id=form['messageId'])
 		

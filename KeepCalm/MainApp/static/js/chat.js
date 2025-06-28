@@ -5,4 +5,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	gameTimeManager.tick();
 	console.log("We're DOMed!");
+	console.log(LocalStorageManager.get("code"));
 });

@@ -16,11 +16,12 @@
 		</div>
 
 		<div class="chats">
-			<div class="chat">
+			{% for chat in chats %}
+			<div class="chat" id="chat-{{ chat.id }}">
 				<img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar">
 				<div class="chat-info">
-					<p class="chat-header">Пед.рада школи №31</p>
-					<p class="chat-last-message">Алкоголь — це єдине що підтримує в мені життя</p>
+					<p class="chat-header">{{ chat.name }}</p>
+					<p class="chat-last-message">Останнє повідомлення</p>
 				</div>
 
 				<div class="chat-status">
@@ -29,6 +30,7 @@
 				</div>
 
 			</div>
+			{% endfor %}
 		</div>
 	</div>
 
@@ -154,6 +156,13 @@
 
 	</div>
 </div>
+{% endblock %}
+
+{% block js_data %}
+<script>
+let messages = JSON.parse(`{{ messages|safe }}`);
+
+</script>
 
 {% endblock %}
 
