@@ -7,3 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	console.log("We're DOMed!");
 	console.log(LocalStorageManager.get("code"));
 });
+
+
+function loadChat() {
+	
+}

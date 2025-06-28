@@ -5,27 +5,25 @@
 
 <head>
 
-  <!-- TITLE AND PROPERTIES -->
+  <!-- ___________________________________ TITLE AND PROPERTIES ___________________________________ -->
+
   {% if title != 'none' %}
   <title>{{ title }}</title>
   {% else %}
   <title>KeepCalm</title>
   {% endif %}
 
-  <!-- META CLASSES -->
+  <!-- _______________________________________ META CLASSES _______________________________________ -->
+
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <!-- GOOGLE SEARCH CONSOLE ID -->
   <meta name="google-site-verification" content="go fuck yourself you goofle sucker" />
-
-
-
   <!-- SECONDARY META DATA  -->
   {% block page_meta %} {% endblock %}
 
-  <!-- STYLES -->
+  <!-- __________________________________________ STYLES __________________________________________ -->
 
   <link crossorigin="anonymous" href="{% static 'libs/modules/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet" type="text/css">
   <script crossorigin="anonymous" src="{% static 'libs/modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
@@ -130,12 +128,15 @@
 </head>
 
 <body>
-  <!-- __________________________________________ NAVBAR __________________________________________ -->
-  <!-- CSRF TOKEN  -->
+
+  <!-- ________________________________________ CSRF TOKEN ________________________________________ -->
+
   {% block csrf_token %} {% endblock %}
 
-  {% if page_name != 'start_game' %}
+  <!-- __________________________________________ NAVBAR __________________________________________ -->
+
   <nav class="navbar fixed-top navbar-expand-lg">
+    
     <ul class="navbar-nav me-auto mb-lg-0 central-nav-panel">
 
       <li class="nav-item desktop {% if page_name == 'signin' %}active-page{% endif %}">
@@ -147,7 +148,7 @@
       </li>
 
       <li class="nav-item desktop {% if page_name == 'chat' %}active-page{% endif %}">
-        <a class="nav-link" href="/">Чат</a>
+        <a class="nav-link" href="/game/CFTA4C/">Чат</a>
       </li>
 
       <li class="nav-item desktop {% if page_name == 'editor' %}active-page{% endif %}">
@@ -166,10 +167,10 @@
 
       {% block nav_items %} {% endblock %}
     </ul>
-  </nav>
-  {% endif %}
 
-  <!-- __________________________________________ CONTENT __________________________________________ -->
+  </nav>
+
+  <!-- __________________________________________ CONTENT _________________________________________ -->
 
   <div id="content" class="page-content background">
 
@@ -181,18 +182,9 @@
 
   </div>
 
-
 </body>
 
-
-
-
-<!-- __________________________________________ SCRIPTS __________________________________________ -->
-
-
-{% if page_name != 'start_game' and page_name != 'game_page' and page_name != 'editor' %}
-<script src="{% static 'js/base.js' %}" type="text/javascript"></script>
-{% endif %}
+<!-- __________________________________________ SCRIPTS ___________________________________________ -->
 
 {% block js_data %} {% endblock %}
 {% block page_scripts %} {% endblock %}
