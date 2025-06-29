@@ -136,10 +136,10 @@ class MainChatPage(View):
 			for message in node_messages:
 				msg_dict = {
 					'id': message.id,
-					'chat_id': message.node.chat.id,
-					'node_id': message.node.id,
+					'chatId': message.node.chat.id,
+					'nodeId': message.node.id,
 					'username': message.user.username,
-					'full_name': message.user.full_name,
+					'fullName': message.user.full_name,
 					'text': message.text,
 					'timestamp': str(message.timestamp)
 				}

@@ -78,6 +78,13 @@ export function warnUser(title, desc, color = "orange", timeout = 4000) {
 }
 
 
+export function formatTime(timestamp) {
+	const hours = timestamp.getHours().toString().padStart(2, '0');
+	const minutes = timestamp.getMinutes().toString().padStart(2, '0');
+	return `${hours}:${minutes}`;
+}
+
+
 export class Request {
 	constructor({ url, data = {}, method = "POST" }) {
 		this.url = url;

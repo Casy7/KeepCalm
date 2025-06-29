@@ -13,6 +13,7 @@ html, body {
 
 #content {
 	width: 95vw;
+	flex-direction: row;
 }
 
 .game-container {

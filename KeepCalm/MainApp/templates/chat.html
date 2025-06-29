@@ -7,7 +7,6 @@
 {% endblock %}
 
 {% block content %}
-
 <div class="game-container">
 	<div class="chat-container">
 		<div class="nav-container">
@@ -17,7 +16,7 @@
 
 		<div class="chats">
 			{% for chat in chats %}
-			<div class="chat" id="chat-{{ chat.id }}">
+			<div class="chat chat-menu-line" id="chat-{{ chat.id }}" data-chat-id="{{ chat.id }}" role="button" tabindex="0">
 				<img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar">
 				<div class="chat-info">
 					<p class="chat-header">{{ chat.name }}</p>
@@ -49,7 +48,7 @@
 
 		</div>
 
-		<div class="messages">
+		<div class="messages" id="chatWindow">
 
 			<div class="message-wrapper incoming">
 				<img class="message-avatar" src="{% static 'images/users/pohui.jpg' %}" alt="avatar">
@@ -149,6 +148,8 @@
 			</div>
 		</div>
 
+
+
 		<div class="input-container">
 			<input type="text" disabled="disabled" placeholder="Message...">
 			<button class="system-button"><img class="system-icon" src="{% static 'icons/send.svg' %}"></button>
@@ -156,14 +157,29 @@
 
 	</div>
 </div>
+
+<div class="debug-time-controller">
+	<button class="system-button" id="decrease-time">Stop|Start</button>
+	<button class="system-button" id="decreaseTimeByOneHour">--</button>
+	<button class="system-button" id="decreaseTimeByOneMinute">-</button>
+	<input type="text" class="debug-time-field" id="debugTime">
+	<button class="system-button" id="increaseTimeByOneMinute">+</button>
+	<button class="system-button" id="increaseTimeByOneHour">++</button>
+	<button class="system-button" id="set-new-time">Set New Time</button>
+</div>
 {% endblock %}
 
 {% block js_data %}
 <script>
-let messages = JSON.parse(`{{ messages|safe }}`);
+
+	let messages = JSON.parse(`{{ messages|safe }}`);
+	let chatMessageManager = null;
+	let gameTimeManager = null;
+	let debugTimeController = null;
+	let messageTemplateBuilder = null;
+	let activeChatId = -1;
 
 </script>
-
 {% endblock %}
 
 {% block page_scripts %}
