@@ -1,4 +1,3 @@
-import ChatMessageManager from './ChatMessageManager.js';
 import TimeObserver from './TimeObserver.js';
 
 
@@ -42,7 +41,7 @@ export default class DebugTimeController extends TimeObserver {
 		current.setMinutes(current.getMinutes() + minutes);
 		this.gameTimeManager.inGameTime = current;
 		this._updateDebugTimeField();
-		chatMessageManager.splitMessagesByTime();
+		timelineEventManager.splitTimelineEventsByTime();
 	}
 
 	setNewTime() {

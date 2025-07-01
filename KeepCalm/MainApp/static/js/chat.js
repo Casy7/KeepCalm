@@ -1,23 +1,34 @@
 import GameTimeManager from './GameTimeManager.js';
-import ChatMessageManager from './ChatMessageManager.js';
+import TimelineEventManager from './TimelineEventManager.js';
 import LocalStorageManager from './localStorageManager.js';
 import DebugTimeController from './DebugTimeController.js';
-import MessageTemplateBuilder from './MessageTemplateBuilder.js';
+import EventRenderer from './EventRenderer.js';
+import TimelineEvent from './TimelineEvent.js';
+import TypingIndicatorManager from './TypingIndicatorManager.js';
+
+
 
 import { copyTextToClipboard, warnUser, Request, removeChildrens, formatTime } from './base.js';
 
 document.addEventListener("DOMContentLoaded", () => {
 
+	timelineEvents = convertTimelineEvents(timelineEventsJSON);
+
 	gameTimeManager = new GameTimeManager();
-	chatMessageManager = new ChatMessageManager(messages);
+	timelineEventManager = new TimelineEventManager(timelineEvents);
 	debugTimeController = new DebugTimeController(gameTimeManager);
-	messageTemplateBuilder = new MessageTemplateBuilder();
+	eventRenderer = new EventRenderer();
+	typingIndicatorManager = new TypingIndicatorManager(eventRenderer);
 
 	gameTimeManager.addObserver(debugTimeController);
-	gameTimeManager.addObserver(chatMessageManager);
+	gameTimeManager.addObserver(timelineEventManager);
+
+	for (let i = 0; i < timelineEventManager.pastTimelineEvents.length; i++) {
+		eventRenderer.buildTemplate(timelineEventManager.pastTimelineEvents[i]);
+	}
+
 	gameTimeManager.start();
 
-	console.log("We're DOMed!");
 	console.log(LocalStorageManager.get("code"));
 
 });
@@ -25,8 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
 document.querySelectorAll('.chat-menu-line').forEach(div => {
 
 	div.addEventListener('click', () => {
-		openChat(div.dataset.chatId);
 		activeChatId = div.dataset.chatId;
+		openChat(div.dataset.chatId);
+		const unreadMessagesCounter = document.getElementById(`chat${div.dataset.chatId}UnreadMessagesCounter`);
+		unreadMessagesCounter.innerText = 0;
+		unreadMessagesCounter.style.display = "none";
 	});
 
 });
@@ -35,13 +49,23 @@ document.querySelectorAll('.chat-menu-line').forEach(div => {
 function openChat(chatId) {
 	chatId = parseInt(chatId);
 	removeChildrens(document.getElementById("chatWindow"));
-	let alreadySentMessages = chatMessageManager.getPastMessagesByChatId(chatId);
+	let alreadySentMessages = timelineEventManager.getPastTimelineEventsByChatId(chatId);
 	const chatWindow = document.getElementById("chatWindow");
+
+	
 
 	for (let i = 0; i < alreadySentMessages.length; i++) {
 		const message = alreadySentMessages[i];
-		messageTemplateBuilder.buildTemplate(message);
+		eventRenderer.buildTemplate(message);
 	}
 }
 
+
+function convertTimelineEvents(events) {
+	let result = [];
+	for (let i = 0; i < events.length; i++) {
+		result.push(new TimelineEvent(events[i]));
+	}
+	return result;
+}
 

@@ -9,7 +9,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.views.generic import View
 
 
-from MainApp.models import User, Chat, ChatOptionNode, ChatNodeLink, Character, Message, PlayerSession, PlayerSelectedNode
+from MainApp.models import User, Chat, ChatOptionNode, ChatNodeLink, ChatMember, Character, Message, PlayerSession, PlayerSelectedNode
 from .code import chat_structure_parser as csp
 
 import json
@@ -70,11 +70,11 @@ def base_context(request, **args):
 
 
 def generate_unique_code(length=6):
-    chars = string.ascii_uppercase + string.digits
-    while True:
-        code = ''.join(random.choices(chars, k=length))
-        if not PlayerSession.objects.filter(user_session_code=code).exists():
-            return code
+	chars = string.ascii_uppercase + string.digits
+	while True:
+		code = ''.join(random.choices(chars, k=length))
+		if not PlayerSession.objects.filter(user_session_code=code).exists():
+			return code
 		
 
 def get_messages_in_nodes(chat_id):
@@ -91,7 +91,7 @@ def get_messages_in_nodes(chat_id):
 				'text': message.text,
 				'time_sent': message.timestamp.strftime("%H:%M:%S") + f".{int(message.timestamp.microsecond / 10000):02d}",
 				'timestamp': str(message.timestamp),
-				'time_was_written': message.time_was_written,
+				'time_was_written': "",
 				'was_read': message.was_read,
 				'attached_image': str(message.attached_image),
 				'username': message.user.username,
@@ -124,10 +124,25 @@ class MainChatPage(View):
 		else:
 			player_session = PlayerSession.objects.get(user_session_code=session_code)
 
-		chats = Chat.objects.all()
+		
 		player_selected_nodes = PlayerSelectedNode.objects.filter(player=player_session)
 
-		messages = []
+		characters = []
+
+		for character in Character.objects.all():
+			characters.append({
+				'id': character.id,
+				'username': character.username,
+				'fullName': character.full_name,
+				'shortName': character.short_name,
+				'displayColor': character.display_color,
+				'typingSpeed': character.typing_speed,
+
+				'avatar': str(character.avatar)
+			})
+		context["characters"] = json.dumps(characters, cls=DjangoJSONEncoder)
+
+		timeline_events = []
 
 		for node in player_selected_nodes:
 
@@ -135,20 +150,40 @@ class MainChatPage(View):
 
 			for message in node_messages:
 				msg_dict = {
+					'type': "message",
 					'id': message.id,
 					'chatId': message.node.chat.id,
 					'nodeId': message.node.id,
+					'userId': message.user.id,
 					'username': message.user.username,
 					'fullName': message.user.full_name,
+					'avatar': str(message.user.avatar),
+					'displayColor': message.user.display_color,
 					'text': message.text,
-					'timestamp': str(message.timestamp)
+					'timestamp': str(message.timestamp),
+					'typingDelayOverride': message.typing_delay_override_ms,
+					'typingSpeed': message.user.typing_speed
 				}
 
-				messages.append(msg_dict)
+				timeline_events.append(msg_dict)
 
-		context["messages"] = json.dumps(messages)
+		context["timelineEvents"] = json.dumps(timeline_events, cls=DjangoJSONEncoder)
 
+		chats = Chat.objects.all()
 		context["chats"] = chats
+
+		chats_JSON = []
+		for chat in Chat.objects.all():
+			chats_JSON.append({
+				'id': chat.id,
+				'name': chat.name,
+				'isGroup': ChatMember.objects.filter(chat=chat).count() > 1,
+				'avatar': str(chat.avatar),
+				'isChannel': chat.is_channel
+			})
+		
+		context["chats_JSON"] = json.dumps(chats_JSON, cls=DjangoJSONEncoder)
+
 		context["player_session"] = player_session
 		context["session_code"] = session_code
 

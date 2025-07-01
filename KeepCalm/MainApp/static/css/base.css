@@ -104,12 +104,6 @@ footer {
 	}
 }
 
-@keyframes fadeout {
-	to {
-		opacity: 0;
-		transform: translateY(10px);
-	}
-}
 
 /* _____________________ Mobile adaptation _____________________ */
 

@@ -11,21 +11,25 @@
 	<div class="chat-container">
 		<div class="nav-container">
 			<button class="system-button wheat chat-menu-btn"><img class="system-icon" src="{% static 'icons/menu.svg' %}"></button>
-			<p class="messager-header">Rawrgram</p>
+			<p class="messager-header">Pawgram</p>
 		</div>
 
 		<div class="chats">
 			{% for chat in chats %}
 			<div class="chat chat-menu-line" id="chat-{{ chat.id }}" data-chat-id="{{ chat.id }}" role="button" tabindex="0">
+				{% if chat.avatar.name != "" %}
+				<img class="message-avatar chat-icon" src="{{ chat.avatar.url }}" alt="avatar">
+				{% else %}
 				<img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar">
+				{% endif %}
 				<div class="chat-info">
 					<p class="chat-header">{{ chat.name }}</p>
-					<p class="chat-last-message">Останнє повідомлення</p>
+					<p class="chat-last-message" id="chat{{ chat.id }}LastMessage">Ще немає повідомлень</p>
 				</div>
 
 				<div class="chat-status">
-					<div class="chat-unread-mesages">1</div>
-					<p class="last-message-timestamp">08:08</p>
+					<div class="chat-unread-mesages" id="chat{{ chat.id }}UnreadMessagesCounter" style="display: none;">0</div>
+					<p class="last-message-timestamp" id="chat{{ chat.id }}LastMessageTimestamp">08:08</p>
 				</div>
 
 			</div>
@@ -42,110 +46,14 @@
 
 			<img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar">
 			<div class="chat-header-col">
-				<p class="chat-header">Пед.рада школи №31</p>
-				<p class="chat-status">5 online</p>
+				<p class="chat-header" id="activeChatHeader">Пед.рада школи №31</p>
+				<p class="chat-status" id="chatStatus">5 online</p>
 			</div>
 
 		</div>
 
 		<div class="messages" id="chatWindow">
-
-			<div class="message-wrapper incoming">
-				<img class="message-avatar" src="{% static 'images/users/pohui.jpg' %}" alt="avatar">
-				<div class="messages-block">
-					<div class="message user-1">
-						<div class="message-username">Марія Михайлівна Завуч</div>
-						<div class="message-content-line">
-							<p class="message-text">Доброго ранку, колеги.</p>
-							<label class="message-timestamp">08:01</label>
-						</div>
-					</div>
-					<div class="message user-1">
-						<div class="message-content-line">
-							<p class="message-text">Вже п'ятниця, до канікул лишилось трохи більше тижня.</p>
-							<label class="message-timestamp">08:02</label>
-						</div>
-					</div>
-					<div class="message user-1">
-						<div class="message-content-line">
-							<p class="message-text">Давайте, треба лише дожити.</p>
-							<label class="message-timestamp">08:02</label>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="message-wrapper incoming">
-				<img class="message-avatar" src="{% static 'images/users/code.jpg' %}" alt="avatar">
-				<div class="messages-block">
-					<div class="message user-2">
-						<div class="message-username">Ігор В. Інформатика</div>
-						<div class="message-content-line">
-							<p class="message-text">І вам не хворіти</p>
-							<label class="message-timestamp">08:03</label>
-						</div>
-					</div>
-					<div class="message user-2">
-						<div class="message-content-line">
-							<p class="message-text">Їбав я цю школу в усіх позах</p>
-							<label class="message-timestamp">08:04</label>
-						</div>
-					</div>
-					<div class="message user-2">
-						<div class="message-content-line">
-							<p class="message-text">Вбачєйте, не в цей чат</p>
-							<label class="message-timestamp">08:04</label>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="message-wrapper incoming">
-				<img class="message-avatar" src="{% static 'images/users/hebbels.jpg' %}" alt="avatar">
-				<div class="messages-block">
-					<div class="message user-3">
-						<div class="message-username">Василь Сухомлинов Історія</div>
-						<div class="message-content-line">
-							<p class="message-text">Та кому ти пиздиш</p>
-							<label class="message-timestamp">08:04</label>
-						</div>
-					</div>
-					<div class="message user-3">
-						<div class="message-content-line">
-							<p class="message-text">
-								Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque pharetra, ante at commodo consequat, enim mi pellentesque enim, vitae euismod sem erat a quam. Praesent congue quis turpis a feugiat.
-							</p>
-							<p></p>
-							<p class="message-text">
-								Lorem ipsum dolor sit amet.
-							</p>
-							<label class="message-timestamp">08:06</label>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="message-wrapper outgoing">
-				<label class="message-timestamp">08:07</label>
-				<div class="message">
-					<div class="message-content-line">
-						<p class="message-text">Тримаймося, колеги</p>
-					</div>
-				</div>
-			</div>
-
-			<div class="message-wrapper incoming">
-				<img class="message-avatar" src="{% static 'images/users/hebbels.jpg' %}" alt="avatar">
-				<div class="messages-block">
-					<div class="message user-3">
-						<div class="message-username">Василь Сухомлинов Історія</div>
-						<div class="message-content-line">
-							<p class="message-text">Алкоголь — це єдине що підтримує в мені життя</p>
-							<label class="message-timestamp">08:08</label>
-						</div>
-					</div>
-				</div>
-			</div>
+			<p class="empty-message">Оберіть чат</p>
 		</div>
 
 
@@ -172,12 +80,18 @@
 {% block js_data %}
 <script>
 
-	let messages = JSON.parse(`{{ messages|safe }}`);
-	let chatMessageManager = null;
+	let timelineEventsJSON = JSON.parse(`{{ timelineEvents|safe }}`);
+	let users = JSON.parse(`{{ characters|safe }}`);
+
+	let timelineEvents = null;
+	let timelineEventManager = null;
 	let gameTimeManager = null;
 	let debugTimeController = null;
-	let messageTemplateBuilder = null;
+	let eventRenderer = null;
+	let typingIndicatorManager = null;
 	let activeChatId = -1;
+
+	const MS_PER_CHAR = 100;
 
 </script>
 {% endblock %}

@@ -7,9 +7,9 @@ from .models import (
 
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'is_group', 'root_node')
+    list_display = ('id', 'name', 'is_channel', 'root_node')
     search_fields = ('name',)
-    list_filter = ('is_group',)
+    list_filter = ('is_channel',)
 
 
 @admin.register(ChatOptionNode)

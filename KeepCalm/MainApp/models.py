@@ -6,7 +6,8 @@ from django.utils.timezone import make_aware
 
 class Chat(models.Model):
 	name = models.CharField(max_length=150)
-	is_group = models.BooleanField(default=False)
+	is_channel = models.BooleanField(default=False)
+	avatar = models.ImageField(upload_to='avatars/chats/', null=True, blank=True)
 	root_node = models.ForeignKey('ChatOptionNode', null=True, on_delete=models.SET_NULL, related_name='entry_for')
 
 
@@ -44,7 +45,7 @@ class Message(models.Model):
 	timestamp = models.DateTimeField(default=make_aware(datetime.datetime(2021, 12, 10)))
 	attached_image = models.ImageField(upload_to='chat_images/', null=True, blank=True)
 	was_read = models.BooleanField(default=False)
-	time_was_written = models.IntegerField(default=-1)
+	typing_delay_override_ms = models.IntegerField(default=-1)
 	text = models.CharField(max_length=1000)
 
 

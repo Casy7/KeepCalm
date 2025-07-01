@@ -10,13 +10,13 @@ export default class GameTimeManager extends Observable {
 		GameTimeManager._instance = this;
 
 		this.tickRate = 1000;
-		this.inGameTime = new Date("2021-12-10T09:00:00");
+		this.inGameTime = new Date("2021-12-10T10:00:00");
 		this._intervalId = null;
 	}
 
 	tick() {
 		this.inGameTime.setTime(this.inGameTime.getTime() + this.tickRate);
-		console.log("Tick:", this.inGameTime);
+		// console.log("Tick:", this.inGameTime);
 	}
 
 	_tickAndNotify() {
