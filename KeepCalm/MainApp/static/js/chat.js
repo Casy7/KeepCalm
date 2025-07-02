@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	timelineEventManager = new TimelineEventManager(timelineEvents);
 	debugTimeController = new DebugTimeController(gameTimeManager);
 	eventRenderer = new EventRenderer();
-	typingIndicatorManager = new TypingIndicatorManager(eventRenderer);
+	typingIndicatorManager = new TypingIndicatorManager(eventRenderer, chats);
 
 	gameTimeManager.addObserver(debugTimeController);
 	gameTimeManager.addObserver(timelineEventManager);

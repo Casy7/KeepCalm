@@ -1,49 +1,72 @@
 export default class TypingIndicatorManager {
-	constructor(eventRenderer) {
-		this.typingUsers = new Map(); // userId => timeoutId
+	constructor(eventRenderer, chats) {
+		this.typingUsersForEachChat = {} // userId => timeoutId
 		this.chatStatusElement = document.getElementById("chatStatus");
 		this.eventRenderer = eventRenderer;
+		this.chats = chats;
 	}
 
 	startTyping(message) {
 		const userId = message.userId;
+		const chatId = message.chatId;
+
+		if (this.typingUsersForEachChat[chatId] === undefined) {
+			this.typingUsersForEachChat[chatId] = new Map();
+		}
+
+		const chatUsersTyping = this.typingUsersForEachChat[chatId];
 
 		// Если уже "пишет" — отменяем старый таймер
-		if (this.typingUsers.has(userId)) {
-			clearTimeout(this.typingUsers.get(userId));
+		if (chatUsersTyping.has(userId)) {
+			clearTimeout(chatUsersTyping.get(userId));
 		}
 
 		// Ставим новый
 		const timeoutId = setTimeout(() => {
-			this.typingUsers.delete(userId);
-			this.updateChatStatus();
+			chatUsersTyping.delete(userId);
+			this.updateChatStatus(chatId);
 
 			// Отрисовать сообщение после "печатает"
 			this.eventRenderer.buildMessage(message);
 		}, message.getTypingDelay());
 
-		this.typingUsers.set(userId, timeoutId);
-		this.updateChatStatus();
+		chatUsersTyping.set(userId, timeoutId);
+		this.updateChatStatus(chatId);
 	}
 
-	updateChatStatus() {
-		const usersTyping = [...this.typingUsers.keys()].map(id => this.getUserName(id));
+	updateChatStatus(chatId) {
+
+		if (this.typingUsersForEachChat[chatId] === undefined) {
+			this.typingUsersForEachChat[chatId] = new Map();
+		}
+
+		const chatUsersTyping = this.typingUsersForEachChat[chatId];
+
+		const usersTyping = [...chatUsersTyping.keys()].map(id => this.getUserName(id));
 
 		if (usersTyping.length === 0) {
-			this.chatStatusElement.innerText = "";
+			this.renderStatus(chatId, "");
 		}
 		else if (usersTyping.length === 1) {
-			this.chatStatusElement.innerText = `${usersTyping[0]} друкує...`;
+			this.renderStatus(chatId, `${usersTyping[0]} друкує...`);
 		}
 		else if (usersTyping.length === 2) {
-			this.chatStatusElement.innerText = `${usersTyping[0]}, ${usersTyping[1]} друкують...`;
+			this.renderStatus(chatId, `${usersTyping[0]}, ${usersTyping[1]} друкують...`);
 		}
 		else {
-			this.chatStatusElement.innerText = `${usersTyping.length} користувачі друкують...`;
+			this.renderStatus(chatId, `${usersTyping.length} користувачі друкують...`);
 		}
 	}
 
-	// Можешь переписать под getCharacterById(userId) или как у тебя там устроено
+	renderStatus(chatId, status = "") {
+		if (activeChatId == chatId) {
+			this.chatStatusElement.innerText = status;
+		}
+		else {
+			document.getElementById(`chat${chatId}LastMessage`).innerText = status;
+		}
+	}
+
 	getUserName(userId) {
 		const user = users.find(u => u.id == userId);
 		return user ? user.fullName : `???`;

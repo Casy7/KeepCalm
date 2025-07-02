@@ -182,7 +182,7 @@ class MainChatPage(View):
 				'isChannel': chat.is_channel
 			})
 		
-		context["chats_JSON"] = json.dumps(chats_JSON, cls=DjangoJSONEncoder)
+		context["chatsJSON"] = json.dumps(chats_JSON, cls=DjangoJSONEncoder)
 
 		context["player_session"] = player_session
 		context["session_code"] = session_code

@@ -51,7 +51,7 @@ export default class EventRenderer {
 			else {
 				let htmlTemplate = `
 				<div class="message-wrapper incoming" data-user-id="${message.userId}" id="message${message.id}"> 
-					<img class="message-avatar" src="/static/images/${message.avatar}" alt="avatar"> 
+					<img class="message-avatar" src="/media/${message.avatar}" alt="avatar"> 
 					<div class="messages-block"> 
 						<div class="message" style="background-color: ${message.displayColor};"> 
 							<div class="message-username">${message.fullName}</div> 
