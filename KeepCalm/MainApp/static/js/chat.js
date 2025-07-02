@@ -52,12 +52,26 @@ function openChat(chatId) {
 	let alreadySentMessages = timelineEventManager.getPastTimelineEventsByChatId(chatId);
 	const chatWindow = document.getElementById("chatWindow");
 
-	
+	document.querySelectorAll('.chat-menu-line').forEach(div => {
+		if (div.dataset.chatId == chatId) {
+			div.classList.add("active-chat");
+		}
+		else {
+			div.classList.remove("active-chat");
+		}
+	});
+
+
+	const chatProperties = chats.find(chat => chat.id == chatId);
+	const chatName = chatProperties.name;
+	document.getElementById("activeChatHeader").innerText = chatName;
 
 	for (let i = 0; i < alreadySentMessages.length; i++) {
 		const message = alreadySentMessages[i];
 		eventRenderer.buildTemplate(message);
 	}
+
+	typingIndicatorManager.updateChatStatus(chatId);
 }
 
 

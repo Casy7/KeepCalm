@@ -65,10 +65,18 @@ export default class EventRenderer {
 				this.chatMessageWindow.insertAdjacentHTML("beforeend", htmlTemplate);
 			}
 		}
-		else {
-			document.getElementById(`chat${chatId}LastMessage`).innerText = message.fullName + ": " + message.text;
-			document.getElementById(`chat${chatId}LastMessageTimestamp`).innerText = formatTime(message.timestamp);
+		
+		this.updateLastMessageInChatsList(message);
+		
+	}
 
+
+	updateLastMessageInChatsList(message) {
+		const chatId = message.chatId;
+		document.getElementById(`chat${chatId}LastMessage`).innerText = message.fullName + ": " + message.text;
+		document.getElementById(`chat${chatId}LastMessageTimestamp`).innerText = formatTime(message.timestamp);
+
+		if (activeChatId != chatId) {
 			const unreadMessagesCounter = document.getElementById(`chat${chatId}UnreadMessagesCounter`);
 			unreadMessagesCounter.innerText = parseInt(unreadMessagesCounter.innerText) + 1;
 			unreadMessagesCounter.style.display = "flex";

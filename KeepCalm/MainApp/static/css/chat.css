@@ -184,6 +184,10 @@
 	justify-content: center;
 }
 
+.active-chat {
+	background-color: #3b6680;
+}
+
 .empty-message {
 	width: 100%;
 	height: 100%;
