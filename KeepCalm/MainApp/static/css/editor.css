@@ -53,11 +53,6 @@ html, body {
 	cursor: pointer;
 }
 
-.chat-container {
-	width: 36vw;
-	height: 85vh;
-}
-
 .message {
 	max-width: 255px;
 }
@@ -72,4 +67,68 @@ html, body {
 	max-width: initial;
 }
 
+.chat-container {
+	width: auto;
+}
 
+
+.editor-container {
+	width: 106vw;
+	height: 100vh;
+	background-color: #34353a;
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+#content {
+	width: 100vw;
+	margin-top: 16px;
+	margin-left: 19px;
+}
+
+.drawflow .drawflow-node .drawflow_content_node {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+}
+
+.root-node-label {
+	color: #97ee8b;
+	font-size: 0.9em;
+	font-family: "Roboto", "Roboto-Black", Tahoma;
+}
+
+.inspector-panel {
+	background-color: #34353a;
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+	display: flex;
+	flex-direction: column;
+	overflow-y: scroll;
+	min-width: 20vw;
+}
+
+.stretch {
+	width: 100%;
+}
+
+.split {
+    display: flex;
+    flex-direction: row;
+}
+
+.gutter {
+    background-color: #eee;
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+    cursor: col-resize;
+}

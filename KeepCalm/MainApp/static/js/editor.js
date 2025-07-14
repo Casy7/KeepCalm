@@ -12,6 +12,12 @@ function sortByTimestamp(arr) {
 
 
 window.addEventListener("load", () => {
+
+	Split(['#editorContainer', '#inspectorPanel'], {
+		sizes: [75, 25],
+		direction: 'horisontal',
+	})
+
 	let editorId = document.getElementById("drawflow");
 
 	editor = new Drawflow(editorId);
@@ -121,7 +127,7 @@ function getEditorCenter() {
 function addNode() {
 	let coords = [document.querySelector(".drawflow").getBoundingClientRect().x, document.querySelector(".drawflow").getBoundingClientRect().y];
 	console.log(coords);
-	data = { "desc": "" };
+	const data = { "desc": "" };
 	editor.addNode("choice", 1, 1, -1 * coords[0] + 500, -1 * coords[1] + 500, "choiceNode", {}, defaultNodeContent);
 	sendChatStructure();
 }
@@ -161,13 +167,13 @@ async function sendChatStructure() {
 		'chatStructure': chatStructureStr
 	}
 
-	const rq = new Request({ url: `/send_chat_structure/${chatId}/`, data: rqData });
+	const rq = new Request({ url: `/send_chat_structure/`, data: rqData });
 	await rq.send();
 
 	if (rq.result === "success") {
-
-		editor.import(JSON.parse(JSON.parse(rq.updatedStructure)));
-		messagesInNodes = JSON.parse(rq.messagesInNodes);
+		const updatedStructure = rq.recievedData.updatedStructure;
+		editor.import(updatedStructure);
+		messagesInNodes = rq.recievedData.messagesInNodes;
 		warnUser("Saved!", "");
 
 	} else {

@@ -18,76 +18,88 @@
 
 
 
-
 <script src="https://cdn.jsdelivr.net/gh/jerosoler/Drawflow/dist/drawflow.min.js"></script>
 {% endblock %}
 
 
 {% block content %}
-<div class="game-container">
-	<div id="drawflow"></div>
-</div>
-<div class="control-panel">
-	<button class="system-button save-btn" id="save-btn">Save</button>
-	<button class="system-button add-node-btn" id="add-node-btn">Add Node</button>
-	<div class="node-selected-panel">
-		<button id="add-output">+</button>
-		<button id="remove-output">-</button>
+
+<div class="split-view">
+
+	<div class="editor-container" id="editorContainer">
+		<div id="drawflow"></div>
+	</div>
+
+
+
+
+
+	<div class="inspector-panel" id="inspectorPanel">
+
+		<div class="control-panel">
+			<div class="row">
+				<button id="add-output">+</button>
+				<button id="remove-output">-</button>
+			</div>
+			<div class="row">
+				<button class="system-button save-btn stretch" id="save-btn">Save</button>
+				<button class="system-button add-node-btn stretch" id="add-node-btn">Add Node</button>
+			</div>
+			<div class="checkbox-container">
+				<input type="checkbox" id="isNodeAutomaticallyStarted">
+				<label for="isNodeAutomaticallyStarted">Start Node automatically</label>
+			</div>
+
+
+
+		</div>
+
+
+		<div class="chat-container">
+
+			<div class="nav-container">
+				<button class="system-button wheat chat-menu-btn"><img class="system-icon" src="{% static 'icons/menu.svg' %}"></button>
+
+				<img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar">
+				<div class="chat-header-col">
+					<p class="chat-header">Пед.рада школи №31</p>
+					<p class="chat-status">5 online</p>
+				</div>
+
+			</div>
+
+			<div class="messages" id="chatNodeId">
+
+			</div>
+
+
+			<div class="flex-group">
+				<div class="flex-panel">
+					<select name="sender-character" id="senderCharacter">
+						{% for character in characters %}
+						<option value="{{ character.0 }}">@{{ character.0 }}, {{ character.1 }}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="flex-panel">
+					<input type="date" value="2021-12-10" id="dateWasWritten">
+					<input type="time" value="08:00" id="timeWasWritten">
+					<input type="number" value="0" min="0" max="59" id="timeSWasWritten">
+					<input type="number" value="0" min="0" max="99" id="timeMsWasWritten">
+				</div>
+				<div class="flex-panel">
+					<input type="text" id="messageText" placeholder="Message...">
+					<button class="system-button" id="sendNewMessageBtn"><img class="system-icon" src="{% static 'icons/send.svg' %}"></button>
+				</div>
+			</div>
+		</div>
 	</div>
 
 </div>
 
 
+<div id="warn-container" style="position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column-reverse; gap: 10px; z-index: 9999;"></div>
 
-
-
-
-
-
-
-<div class="chat-container">
-
-	<div class="nav-container">
-		<button class="system-button wheat chat-menu-btn"><img class="system-icon" src="{% static 'icons/menu.svg' %}"></button>
-
-		<img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar">
-		<div class="chat-header-col">
-			<p class="chat-header">Пед.рада школи №31</p>
-			<p class="chat-status">5 online</p>
-		</div>
-
-	</div>
-
-	<div class="messages" id="chatNodeId">
-
-	</div>
-
-
-	<div class="flex-group">
-		<div class="flex-panel">
-			<select name="sender-character" id="senderCharacter">
-				{% for character in characters %}
-				<option value="{{ character.0 }}">@{{ character.0 }}, {{ character.1 }}</option>
-				{% endfor %}
-			</select>
-		</div>
-		<div class="flex-panel">
-			<input type="date" value="2021-12-10" id="dateWasWritten">
-			<input type="time" value="08:00" id="timeWasWritten">
-			<input type="number" value="0" min="0" max="59" id="timeSWasWritten">
-			<input type="number" value="0" min="0" max="99" id="timeMsWasWritten">
-		</div>
-		<div class="flex-panel">
-			<input type="text" id="messageText" placeholder="Message...">
-			<button class="system-button" id="sendNewMessageBtn"><img class="system-icon" src="{% static 'icons/send.svg' %}"></button>
-		</div>
-	</div>
-
-
-	<div id="warn-container" style="position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column-reverse; gap: 10px; z-index: 9999;"></div>
-
-
-</div>
 {% endblock %}
 
 {% block js_data %}
@@ -123,4 +135,5 @@
 
 {% block page_scripts %}
 <script src="{% static 'js/editor.js' %}" type="module"></script>
+<script src="{% static 'modules/split-js/split.min.js' %}"></script>
 {% endblock %}

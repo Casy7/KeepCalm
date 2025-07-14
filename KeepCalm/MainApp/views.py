@@ -10,7 +10,7 @@ from django.views.generic import View
 
 
 from MainApp.models import User, Chat, ChatOptionNode, ChatNodeLink, ChatMember, Character, Message, PlayerSession, PlayerSelectedNode
-from .code import chat_structure_parser as csp
+from .utils import chat_structure_parser as csp
 
 import json
 import random
@@ -77,11 +77,11 @@ def generate_unique_code(length=6):
 			return code
 		
 
-def get_messages_in_nodes(chat_id):
+def get_messages_in_nodes():
 
 	messages_in_nodes = {}
 
-	for node in ChatOptionNode.objects.filter(chat = Chat.objects.get(id=chat_id)):
+	for node in ChatOptionNode.objects.all():
 		messages = Message.objects.filter(node=node).order_by('timestamp')
 		messages_txt = {}
 
@@ -121,6 +121,8 @@ class MainChatPage(View):
 		player_session = None
 		if not PlayerSession.objects.filter(user_session_code=session_code).exists():
 			player_session = PlayerSession.objects.create(user_session_code=session_code)
+			start_node = ChatOptionNode.objects.get(id=4)
+			PlayerSelectedNode.objects.create(player=player_session, node=start_node)
 		else:
 			player_session = PlayerSession.objects.get(user_session_code=session_code)
 
@@ -193,12 +195,12 @@ class MainChatPage(View):
 class ChatEditorPage(View):
 	def get(self, request, chat_id):
 		context = base_context(request, title='Edit', page_name='editor')
-		context['chat_id'] = chat_id
-		context['chat_obj'] = Chat.objects.get(id=chat_id)
-		context['title'] = context['chat_obj'].name
-		context['chat_structure'] = csp.ChatStructureAdapter.to_json(context['chat_obj'])
+		# context['chat_id'] = chat_id
+		# context['chat_obj'] = Chat.objects.get(id=chat_id)
+		# context['title'] = context['chat_obj'].name
+		context['chat_structure'] = json.dumps(csp.ChatStructureAdapter.to_json(), cls=DjangoJSONEncoder)
 
-		messagesInNodes = get_messages_in_nodes(chat_id)
+		messagesInNodes = get_messages_in_nodes()
 
 
 		context['messagesInNodes'] = json.dumps(messagesInNodes, cls=DjangoJSONEncoder)
@@ -305,23 +307,22 @@ class StartGame(View):
 
 
 class AjaxEditorSaveChatStructure(View):
-	def post(self, request, chat_id):
+	def post(self, request):
 		form = json.loads(request.body)
 		chat_structure = form['chatStructure']
 		chat_structure = json.loads(chat_structure)
-		chat_structure = csp.ChatStructureAdapter.from_json(chat_id, chat_structure)
+		chat_structure = csp.ChatStructureAdapter.from_json(chat_structure)
 
 		response = {}
 
-		chat = Chat.objects.get(id=chat_id)
-		new_structure = json.dumps(csp.ChatStructureAdapter.to_json(chat))
+		new_structure = csp.ChatStructureAdapter.to_json()
 
 		response["updatedStructure"] = new_structure
-		response["messagesInNodes"] = get_messages_in_nodes(chat_id)
+		response["messagesInNodes"] = get_messages_in_nodes()
 		response["result"] = "success"
 
 		return HttpResponse(
-			json.dumps(response),
+			json.dumps(response, cls=DjangoJSONEncoder),
 			content_type="application/json"
 		)
 
