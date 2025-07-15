@@ -1,6 +1,6 @@
 
 import { copyTextToClipboard, warnUser, Request, removeChildrens } from './base.js';
-
+import Split from '../modules/split.js/split.es.js';
 
 
 function sortByTimestamp(arr) {
@@ -9,13 +9,11 @@ function sortByTimestamp(arr) {
 }
 
 
-
-
 window.addEventListener("load", () => {
 
 	Split(['#editorContainer', '#inspectorPanel'], {
-		sizes: [75, 25],
-		direction: 'horisontal',
+		minSize: 200,
+		sizes: [75, 25]
 	})
 
 	let editorId = document.getElementById("drawflow");
@@ -52,8 +50,6 @@ window.addEventListener("load", () => {
 		console.log("Node removed: " + id);
 	})
 });
-
-
 
 
 
@@ -107,7 +103,7 @@ document.getElementById("sendNewMessageBtn").addEventListener("click", () => {
 	sendNodeMessage();
 });
 
-$("#chatNodeId").on('click', '.message-delete-btn', function () {
+document.getElementById("chatNodeId").addEventListener("click", () =>{
 	deleteNodeMessage(this);
 });
 

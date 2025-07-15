@@ -37,18 +37,32 @@
 	<div class="inspector-panel" id="inspectorPanel">
 
 		<div class="control-panel">
-			<div class="row">
-				<button id="add-output">+</button>
-				<button id="remove-output">-</button>
+			<div class="text-center position-relative my-4">
+				<hr class="m-0">
+				<span class="position-absolute top-50 start-50 translate-middle px-3 hr-header">
+					Editor controls
+				</span>
 			</div>
-			<div class="row">
+			<div class="stretch-elements-container">
 				<button class="system-button save-btn stretch" id="save-btn">Save</button>
 				<button class="system-button add-node-btn stretch" id="add-node-btn">Add Node</button>
+			</div>
+
+			<div class="text-center position-relative my-4">
+				<hr class="m-0">
+				<span class="position-absolute top-50 start-50 translate-middle px-3 hr-header">
+					Node controls
+				</span>
 			</div>
 			<div class="checkbox-container">
 				<input type="checkbox" id="isNodeAutomaticallyStarted">
 				<label for="isNodeAutomaticallyStarted">Start Node automatically</label>
 			</div>
+			<select id="chatSelector">
+				{% for chat in chats %}
+				<option value="{{ chat.id }}">{{ chat.name }}</option>
+				{% endfor %}
+			</select>
 
 
 
@@ -135,5 +149,4 @@
 
 {% block page_scripts %}
 <script src="{% static 'js/editor.js' %}" type="module"></script>
-<script src="{% static 'modules/split-js/split.min.js' %}"></script>
 {% endblock %}

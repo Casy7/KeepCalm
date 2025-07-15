@@ -212,6 +212,9 @@ class ChatEditorPage(View):
 		for character in characters:
 			context['characters_JSON'][character[0]] = character[1]
 
+		chats = Chat.objects.all()
+		context["chats"] = chats
+
 
 		context['characters_JSON'] = json.dumps(context['characters_JSON'])
 
