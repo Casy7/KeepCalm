@@ -1,15 +1,22 @@
 from django.contrib import admin
 from .models import (
-    Chat, ChatOptionNode, ChatNodeLink,
+    Chat, ChatOptionNode, ChatNodeLink, EntryNode,
     Character, Message, ChatMember, PlayerSession, PlayerSelectedNode
 )
 
 
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'is_channel', 'root_node')
+    list_display = ('id', 'name', 'is_channel')
     search_fields = ('name',)
     list_filter = ('is_channel',)
+
+
+@admin.register(EntryNode)
+class EntryNodeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'node',)
+    search_fields = ('node',)
+    list_filter = ('node',)
 
 
 @admin.register(ChatOptionNode)

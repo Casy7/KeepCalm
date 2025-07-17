@@ -8,15 +8,20 @@ class Chat(models.Model):
 	name = models.CharField(max_length=150)
 	is_channel = models.BooleanField(default=False)
 	avatar = models.ImageField(upload_to='avatars/chats/', null=True, blank=True)
-	root_node = models.ForeignKey('ChatOptionNode', null=True, on_delete=models.SET_NULL, related_name='entry_for')
+
 
 
 class ChatOptionNode(models.Model):
 	chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+	short_description = models.CharField(max_length=50, blank=True, default="")
 	description = models.CharField(max_length=250, blank=True, default="")
 
 	pos_x = models.IntegerField(default=0)
 	pos_y = models.IntegerField(default=0)
+
+
+class EntryNode(models.Model):
+	node = models.OneToOneField(ChatOptionNode, on_delete=models.CASCADE, related_name="entry_points", unique=True)
 
 
 class ChatNodeLink(models.Model):

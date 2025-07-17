@@ -136,3 +136,9 @@ html, body {
 	background-color: #606a7d;
 	color: white;
 }
+
+.drawflow .drawflow-node.entry-node {
+	background: unset;
+	border: 3px solid orange;
+	background-color: #6e6e43;
+}

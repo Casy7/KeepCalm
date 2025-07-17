@@ -57,25 +57,27 @@ export function copyTextToClipboard(text) {
 export function warnUser(title, desc, color = "orange", timeout = 4000) {
 	const container = document.getElementById('warningContainer');
 
-	const toast = $(`
-		<div class="warn-toast" style="background-color: `+ color + `;">
-			<div class="warn-title">
-				`+ title + `
-			</div>
-			<div class="warn-desc">
-				`+ desc + `
-			</div>
+	const toastHtml = `
+		<div class="warn-toast" style="background-color: ${color};">
+			<div class="warn-title">${title}</div>
+			<div class="warn-desc">${desc}</div>
 		</div>
-		`);
+	`;
 
-	$(container).append(toast);
+	container.insertAdjacentHTML('beforeend', toastHtml);
 
-	// Remove after 4 seconds
+	const toast = container.lastElementChild;
+
 	setTimeout(() => {
-		toast.addClass('fadeout');
-		setTimeout(() => container.removeChild(toast[0]), 500); // wait for fadeout
+		toast.classList.add('fadeout');
+		setTimeout(() => {
+			if (toast.parentNode === container) {
+				container.removeChild(toast);
+			}
+		}, 500);
 	}, timeout);
 }
+
 
 
 export function formatTime(timestamp) {

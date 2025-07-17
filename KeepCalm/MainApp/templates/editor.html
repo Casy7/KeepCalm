@@ -12,9 +12,9 @@
 <link rel="stylesheet" href="{% static 'css/chat.css' %}" type="text/css" />
 
 <link rel="stylesheet" href="{% static 'css/editor-config.css' %}" type="text/css" />
-<link rel="stylesheet" href="{% static 'css/editor.css' %}" type="text/css" />
 <link rel="stylesheet" href="{% static 'css/chat-selector.css' %}" type="text/css" />
 <link rel="stylesheet" href="{% static 'css/form-controls.css' %}" type="text/css" />
+<link rel="stylesheet" href="{% static 'css/editor.css' %}" type="text/css" />
 
 
 
@@ -37,76 +37,97 @@
 	<div class="inspector-panel" id="inspectorPanel">
 
 		<div class="control-panel">
-			<div class="text-center position-relative my-4">
+			<div class="text-center position-relative my-4 control-panel-header">
 				<hr class="m-0">
 				<span class="position-absolute top-50 start-50 translate-middle px-3 hr-header">
 					Editor controls
 				</span>
 			</div>
-			<div class="stretch-elements-container">
-				<button class="system-button save-btn stretch" id="save-btn">Save</button>
-				<button class="system-button add-node-btn stretch" id="add-node-btn">Add Node</button>
+			<div class="control-panel-content">
+				<div class="stretch-elements-container">
+					<button class="system-button save-btn stretch" id="save-btn">Save</button>
+					<button class="system-button add-node-btn stretch" id="add-node-btn">+ Choice</button>
+					<button class="system-button add-node-btn stretch" id="add-script-btn">+ Script</button>
+					<button class="system-button add-node-btn stretch" id="add-chat-btn">+ Chat</button>
+				</div>
 			</div>
+		</div>
 
-			<div class="text-center position-relative my-4">
+		<div class="control-panel">
+			<div class="text-center position-relative my-4 control-panel-header">
 				<hr class="m-0">
 				<span class="position-absolute top-50 start-50 translate-middle px-3 hr-header">
 					Node controls
 				</span>
 			</div>
-			<div class="checkbox-container">
-				<input type="checkbox" id="isNodeAutomaticallyStarted">
-				<label for="isNodeAutomaticallyStarted">Start Node automatically</label>
+			<div class="control-panel-content">
+				<div class="checkbox-container">
+					<input type="checkbox" id="isNodeAutomaticallyStarted">
+					<label for="isNodeAutomaticallyStarted">Game Entry Node</label>
+				</div>
+				<select class="form-control dark-control" id="nodeChatSelector">
+					{% for chat in chats %}
+					<option value="{{ chat.id }}">{{ chat.name }}</option>
+					{% endfor %}
+				</select>
+				<textarea class="form-control dark-control" id="nodeShortDescription"></textarea>
+				<textarea class="form-control dark-control" id="nodeDescription"></textarea>
+				<button class="system-button save-btn stretch" id="saveNodePropertiesBtn">Save</button>
+
 			</div>
-			<select id="chatSelector">
-				{% for chat in chats %}
-				<option value="{{ chat.id }}">{{ chat.name }}</option>
-				{% endfor %}
-			</select>
+		</div>
+		<div class="control-panel">
+			<div class="text-center position-relative my-4 control-panel-header">
+				<hr class="m-0">
+				<span class="position-absolute top-50 start-50 translate-middle px-3 hr-header">
+					Node controls
+				</span>
+			</div>
+
+			<div class="control-panel-content">
+				<div class="chat-container">
+
+					<div class="nav-container">
+						<button class="system-button wheat chat-menu-btn"><img class="system-icon" src="{% static 'icons/menu.svg' %}"></button>
+
+						<img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar">
+						<div class="chat-header-col">
+							<p class="chat-header">Пед.рада школи №31</p>
+							<p class="chat-status">5 online</p>
+						</div>
+
+					</div>
+
+					<div class="messages" id="chatNodeId">
+
+					</div>
 
 
-
+					<div class="flex-group">
+						<div class="flex-panel">
+							<select name="sender-character" id="senderCharacter">
+								{% for character in characters %}
+								<option value="{{ character.0 }}">@{{ character.0 }}, {{ character.1 }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="flex-panel">
+							<input type="date" value="2021-12-10" id="dateWasWritten">
+							<input type="time" value="08:00" id="timeWasWritten">
+							<input type="number" value="0" min="0" max="59" id="timeSWasWritten">
+							<input type="number" value="0" min="0" max="99" id="timeMsWasWritten">
+						</div>
+						<div class="flex-panel">
+							<input type="text" id="messageText" placeholder="Message...">
+							<button class="system-button" id="sendNewMessageBtn"><img class="system-icon" src="{% static 'icons/send.svg' %}"></button>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 
 
-		<div class="chat-container">
 
-			<div class="nav-container">
-				<button class="system-button wheat chat-menu-btn"><img class="system-icon" src="{% static 'icons/menu.svg' %}"></button>
-
-				<img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar">
-				<div class="chat-header-col">
-					<p class="chat-header">Пед.рада школи №31</p>
-					<p class="chat-status">5 online</p>
-				</div>
-
-			</div>
-
-			<div class="messages" id="chatNodeId">
-
-			</div>
-
-
-			<div class="flex-group">
-				<div class="flex-panel">
-					<select name="sender-character" id="senderCharacter">
-						{% for character in characters %}
-						<option value="{{ character.0 }}">@{{ character.0 }}, {{ character.1 }}</option>
-						{% endfor %}
-					</select>
-				</div>
-				<div class="flex-panel">
-					<input type="date" value="2021-12-10" id="dateWasWritten">
-					<input type="time" value="08:00" id="timeWasWritten">
-					<input type="number" value="0" min="0" max="59" id="timeSWasWritten">
-					<input type="number" value="0" min="0" max="99" id="timeMsWasWritten">
-				</div>
-				<div class="flex-panel">
-					<input type="text" id="messageText" placeholder="Message...">
-					<button class="system-button" id="sendNewMessageBtn"><img class="system-icon" src="{% static 'icons/send.svg' %}"></button>
-				</div>
-			</div>
-		</div>
 	</div>
 
 </div>

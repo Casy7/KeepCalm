@@ -62,50 +62,71 @@ document.getElementById("add-node-btn").addEventListener("click", () => {
 	addNode();
 });
 
-document.getElementById("add-output").addEventListener("click", () => {
+// document.getElementById("add-output").addEventListener("click", () => {
 
-	// const selectedId = selectedNode;
+// const selectedId = selectedNode;
 
-	// if (!selectedId) {
-	// 	console.warn("No node selected.");
-	// 	return;
-	// }
+// if (!selectedId) {
+// 	console.warn("No node selected.");
+// 	return;
+// }
 
-	// editor.addNodeOutput(selectedId);
-	// editor.updateConnectionNodes(`node-${selectedId}`);
-});
+// editor.addNodeOutput(selectedId);
+// editor.updateConnectionNodes(`node-${selectedId}`);
+// });
 
-document.getElementById("remove-output").addEventListener("click", () => {
-	// const selectedId = selectedNode;
+// document.getElementById("remove-output").addEventListener("click", () => {
+// const selectedId = selectedNode;
 
-	// if (!selectedId) {
-	// 	console.warn("No node selected.");
-	// 	return;
-	// }
+// if (!selectedId) {
+// 	console.warn("No node selected.");
+// 	return;
+// }
 
-	// const node = editor.getNodeFromId(selectedId);
-	// const outputCount = Object.keys(node.outputs).length;
+// const node = editor.getNodeFromId(selectedId);
+// const outputCount = Object.keys(node.outputs).length;
 
-	// if (outputCount === 0) {
-	// 	console.warn("No nodes to remove.");
-	// 	return;
-	// }
+// if (outputCount === 0) {
+// 	console.warn("No nodes to remove.");
+// 	return;
+// }
 
-	// let outputs = Object.keys(node.outputs);
+// let outputs = Object.keys(node.outputs);
 
-	// const output_class = outputs[outputs.length - 1];
+// const output_class = outputs[outputs.length - 1];
 
-	// editor.removeNodeOutput(selectedId, output_class)
-	// editor.updateConnectionNodes(`node-${selectedId}`);
-});
+// editor.removeNodeOutput(selectedId, output_class)
+// editor.updateConnectionNodes(`node-${selectedId}`);
+// });
 
 document.getElementById("sendNewMessageBtn").addEventListener("click", () => {
 	sendNodeMessage();
 });
 
-document.getElementById("chatNodeId").addEventListener("click", () =>{
+document.getElementById("chatNodeId").addEventListener("click", () => {
 	deleteNodeMessage(this);
 });
+
+document.querySelectorAll(".control-panel-header").forEach(controlPanelHeader => controlPanelHeader.addEventListener("click", (event) => {
+	toggleControlPanelVisibility(event.target);
+}))
+
+document.getElementById("saveNodePropertiesBtn").addEventListener("click", () => {
+	sendNodeProperties();
+})
+
+
+function toggleControlPanelVisibility(controlPanel) {
+	console.log(controlPanel);
+	let controlPanelContent = controlPanel.parentNode.parentNode.querySelector(".control-panel-content");
+	if (controlPanelContent.style.display == "none") {
+		controlPanelContent.style.display = "block";
+	} else {
+		controlPanelContent.style.display = "none";
+	}
+
+}
+
 
 function getEditorCenter() {
 	let editorTransform = document.querySelector(".drawflow").style.transform;
@@ -129,30 +150,37 @@ function addNode() {
 }
 
 
+
 function loadMessagesToEditor(nodeId) {
-	removeChildrens(document.getElementById("chatNodeId"));
-	let messages_list = Object.values(messagesInNodes[parseInt(nodeId)]);
-	let messages = sortByTimestamp(messages_list);
+	const container = document.getElementById("chatNodeId");
+	removeChildrens(container);
+
+	const messagesList = Object.values(messagesInNodes[parseInt(nodeId)]);
+	const messages = sortByTimestamp(messagesList);
+
 	for (let i = 0; i < messages.length; i++) {
-		let message = messages[parseInt(i)];
-		$("#chatNodeId").append(`
-		<div class="message-wrapper incoming">
-			<img class="message-avatar" src="{% static 'images/users/code.jpg' %}" alt="avatar">
-			<div class="messages-block">
-				<div class="message user-2">
-					<div class="message-username">`+ message.full_name + `</div>
-					<div class="message-content-line" id="message-`+ message.id + `">
-						<p class="message-text">`+ message.text + `</p>
-						<label class="message-timestamp">`+ message.time_sent + `</label>
-						<a class="message-timestamp message-delete-btn" data-value="`+ message.id + `">Del.</a>
+		const message = messages[i];
+
+		const template = `
+			<div class="message-wrapper incoming">
+				<img class="message-avatar" src="/static/images/users/code.jpg" alt="avatar">
+				<div class="messages-block">
+					<div class="message user-2">
+						<div class="message-username">${message.full_name}</div>
+						<div class="message-content-line" id="message-${message.id}">
+							<p class="message-text">${message.text}</p>
+							<label class="message-timestamp">${message.time_sent}</label>
+							<a class="message-timestamp message-delete-btn" data-value="${message.id}">Del.</a>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-			`
-		);
+		`;
+
+		container.insertAdjacentHTML("beforeend", template);
 	}
 }
+
 
 
 async function sendChatStructure() {
@@ -266,4 +294,37 @@ async function deleteNodeMessage(target) {
 }
 
 
+function loadNodePropertiesToControlPanel() {
 
+}
+
+
+async function sendNodeProperties() {
+
+	const nodeId = selectedNode.replace("node-", "");
+	const nodeDescription = document.getElementById("nodeDescription").value;
+	const nodeShortDescription = document.getElementById("nodeShortDescription").value;
+	const nodeChatId = document.getElementById("nodeChatSelector").value;
+	const isNodeAutomaticallyStarted = document.getElementById("isNodeAutomaticallyStarted").checked;
+
+	const rqData = {
+		'nodeId': nodeId,
+		'nodeDescription': nodeDescription,
+		'nodeShortDescription': nodeShortDescription,
+		'chatId': nodeChatId,
+		'isEntryPoint': isNodeAutomaticallyStarted
+	}
+
+	const rq = new Request({ url: "/update_node_properties/", data: rqData });
+	await rq.send();
+
+	if (rq.result === "success") {
+
+		warnUser("Saved!", "");
+
+	} else {
+
+		warnUser("Error!", "Cannot save properties.");
+
+	}
+}

@@ -1,4 +1,4 @@
-from ..models import Message, Chat, ChatMember, Character, ChatOptionNode, ChatNodeLink
+from ..models import Message, Chat, ChatMember, Character, ChatOptionNode, ChatNodeLink, EntryNode
 import json
 
 
@@ -55,7 +55,6 @@ class ChatStructureAdapter:
 	@staticmethod
 	def from_json(json_data):
 
-		
 		tree_root = json_data["Home"]['data']
 
 		for key in tree_root.keys():
@@ -98,12 +97,17 @@ class ChatStructureAdapter:
 			for i in outputs:
 				outputs_template.append({'node': i.child.id, 'input': 'output_1'})
 
-
 			root_node_label_template = ""
-			chat_this_node_is_root_for = Chat.objects.filter(root_node=node)
-			if len(chat_this_node_is_root_for):
-				chat_rn = chat_this_node_is_root_for[0]
-				root_node_label_template = f"<small class='root-node-label'>Root for C: {str(chat_rn.id)} — {chat_rn.name}</small>"
+			classes = ""
+
+			is_entry_point = EntryNode.objects.filter(node=node).exists()
+			if is_entry_point:
+				chat_rn = node.chat
+				root_node_label_template = f"<small class='root-node-label'>Game Entry Point</small>"
+				classes+= " entry-node"
+
+
+			# root_node_label_template = f"<small class='root-node-label'>Root for C: {str(chat_rn.id)} — {chat_rn.name}</small>"
 
 			chat_name_label_template = f"<p class='chatName'>N: {str(node.id)}  C: {str(node.chat.id)} — {node.chat.name}</p>"
 
@@ -112,18 +116,18 @@ class ChatStructureAdapter:
 
 				'name': 'chatNode',
 				'data': {
-					'desc': node.description,
+						'desc': node.description,
 					'dbId': node.id,
 					'chatId': node.chat.id,
 					'chatName': node.chat.name,
 				},
-				'class': 'chatNode',
+				'class': 'chatNode' + classes,
 				'html': root_node_label_template + chat_name_label_template + "<textarea class='form-input' df-desc name='description'></textarea>",
 				'typenode': False,
 				'inputs': {
-						'input_1': {
-							'connections': inputs_template
-						}
+					'input_1': {
+						'connections': inputs_template
+					}
 				},
 				'outputs': {
 					'output_1': {

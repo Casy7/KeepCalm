@@ -12,6 +12,7 @@ from .views import (
 	AjaxEditorSaveMessage,
 	AjaxEditorDeleteMessage,
 	AjaxCheckIfUserSessionExists,
+	AjaxUpdateNodeProperties,
 	SignIn,
 	SignUp,
 	Logout,
@@ -23,8 +24,9 @@ urlpatterns = [
 
     path("game/<str:session_code>/", MainChatPage.as_view(), name="game_page"),
 
-	path("editor/<int:chat_id>/", ChatEditorPage.as_view(), name="editor"),
+	path("editor/", ChatEditorPage.as_view(), name="editor"),
 	path("send_chat_structure/", AjaxEditorSaveChatStructure.as_view(), name="send_chat_structure"),
+	path("update_node_properties/", AjaxUpdateNodeProperties.as_view(), name="update_node_properties"),
 	path("send_node_message/", AjaxEditorSaveMessage.as_view(), name="send_node_message"),
 	path("delete_node_message/", AjaxEditorDeleteMessage.as_view(), name="delete_node_message"),
 
