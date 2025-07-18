@@ -199,7 +199,7 @@ class ChatEditorPage(View):
 
 		messagesInNodes = get_messages_in_nodes()
 
-		context['messagesInNodes'] = json.dumps(messagesInNodes, cls=DjangoJSONEncoder)
+		context['messages_in_node'] = json.dumps(messagesInNodes, cls=DjangoJSONEncoder)
 
 		characters = [(character.username, character.full_name) for character in Character.objects.all()]
 		context['characters'] = characters
@@ -210,6 +210,36 @@ class ChatEditorPage(View):
 
 		chats = Chat.objects.all()
 		context["chats"] = chats
+
+		node_properties = {}
+		for node in ChatOptionNode.objects.all():
+			props = {}
+			props["chatId"] = node.chat.id
+			props["nodeId"] = node.id
+			props["type"] = node.type
+			props["chatName"] = node.chat.name
+			props["description"] = node.description
+			props["isGameEntryNode"] = EntryNode.objects.filter(node=node).exists()
+
+			if node.type == "choice":
+				props["userChoiceText"] = node.user_choice_text
+
+			node_properties[node.id] = props
+
+		chats_JSON = {}
+
+		for chat in Chat.objects.all():
+			chats_JSON[chat.id] = {
+				'id': chat.id,
+				'name': chat.name,
+				'isGroup': ChatMember.objects.filter(chat=chat).count() > 1,
+				'avatar': str(chat.avatar),
+				'isChannel': chat.is_channel
+			}
+
+		context["chats_JSON"] = json.dumps(chats_JSON, cls=DjangoJSONEncoder)
+
+		context['node_properties'] = json.dumps(node_properties, cls=DjangoJSONEncoder)
 
 		context['characters_JSON'] = json.dumps(context['characters_JSON'])
 
@@ -400,7 +430,7 @@ class AjaxUpdateNodeProperties(View):
 		node_id = data['nodeId']
 		node = ChatOptionNode.objects.get(id=node_id)
 		node.description = data['nodeDescription']
-		node.short_description = data['nodeShortDescription']
+		node.user_choice_text = data['nodeUserChoiceText']
 		node.chat = Chat.objects.get(id=data['chatId'])
 		is_entry_point = data['isEntryPoint']
 		if is_entry_point == True:
@@ -410,11 +440,61 @@ class AjaxUpdateNodeProperties(View):
 		else:
 			if EntryNode.objects.filter(node=node).exists():
 				EntryNode.objects.filter(node=node)[0].delete()
-			
+
 		node.save()
 
 		response = {}
 		response["result"] = "success"
+
+		return HttpResponse(
+			json.dumps(response),
+			content_type="application/json"
+		)
+
+
+class AjaxEditorCreateNode(View):
+	def post(self, request):
+		data = json.loads(request.body)
+		response = {}
+
+		if not Chat.objects.filter(id=data['chatId']).exists():
+			response["result"] = "error"
+			response["errorMessage"] = "Chat does not exist"
+			return HttpResponse(
+				json.dumps(response),
+				content_type="application/json"
+			)
+
+		node = ChatOptionNode.objects.create(
+			chat=Chat.objects.get(id=data['chatId']),
+			type=data['nodeType'],
+			description=data['nodeDescription'],
+			user_choice_text=data['nodeUserChoiceText'] if 'nodeUserChoiceText' in data else "",
+			pos_x=data['posX'],
+			pos_y=data['posY']
+		)
+
+		node.save()
+
+		if data['isGameEntryNode'] == True:
+			new_entry_node = EntryNode(node=node)
+			new_entry_node.save()
+
+		response["nodeId"] = node.id
+		response["result"] = "success"
+
+		return HttpResponse(
+			json.dumps(response),
+			content_type="application/json"
+		)
+
+
+class AjaxGetEditorNodeStructure(View):
+	def get(self, request):
+		response = {}
+
+		response["result"] = "success"
+		response["nodeStructure"] = csp.ChatStructureAdapter.to_json()
 
 		return HttpResponse(
 			json.dumps(response),

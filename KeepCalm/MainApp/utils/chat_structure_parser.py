@@ -23,10 +23,6 @@ class ChatStructureAdapter:
 			node_obj.description = node['data']['desc']
 		node_obj.save()
 
-		if 'root' in node['data'] and node['data']['root'] == 'true':
-
-			chat.root_node = node_obj
-			chat.save()
 
 	@staticmethod
 	def make_node_connections(chat, node, nodes_dict):
@@ -109,7 +105,12 @@ class ChatStructureAdapter:
 
 			# root_node_label_template = f"<small class='root-node-label'>Root for C: {str(chat_rn.id)} — {chat_rn.name}</small>"
 
-			chat_name_label_template = f"<p class='chatName'>N: {str(node.id)}  C: {str(node.chat.id)} — {node.chat.name}</p>"
+			chat_name_label_template = f"<p class='node-prop'>node id: {str(node.id)}</p><p class='node-prop chat-name'>chat: {str(node.chat.id)} — {node.chat.name}</p>"
+
+			node_type_template = ""
+
+			if node.type == "cross_chat_event":
+				classes += " chat-event-node"
 
 			node_template = {
 				'id': node.id,
@@ -122,7 +123,7 @@ class ChatStructureAdapter:
 					'chatName': node.chat.name,
 				},
 				'class': 'chatNode' + classes,
-				'html': root_node_label_template + chat_name_label_template + "<textarea class='form-input' df-desc name='description'></textarea>",
+				'html': root_node_label_template + chat_name_label_template + f"<p class='node-prop node-type'>type: {node.type}</p><textarea class='form-input' df-desc name='description'></textarea>",
 				'typenode': False,
 				'inputs': {
 					'input_1': {

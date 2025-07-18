@@ -27,7 +27,13 @@ window.addEventListener("load", () => {
 	editor.start();
 
 	editor.addModule('nameNewModule');
-	var data = { "root": 'true', "desc": "Початок чату" };
+	let data = { "root": 'true', "desc": "Початок чату" };
+
+	clearNodePropertiesInInspectorPanel();
+
+
+	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
 
 	if (chatStructureData == {}) {
@@ -40,10 +46,16 @@ window.addEventListener("load", () => {
 	editor.on('nodeSelected', function (id) {
 		selectedNode = id;
 		loadMessagesToEditor(id.replace("node-", ""));
+		loadNodePropertiesToInspectorPanel(id.replace("node-", ""));
+		document.getElementById("nodeControlsInspectorPanel").style.display = "flex";
+		document.getElementById("chatMessagesInspectorPanel").style.display = "flex";
 	});
 
 	editor.on('nodeUnselected', function () {
 		selectedNode = null;
+		clearNodePropertiesInInspectorPanel();
+		document.getElementById("nodeControlsInspectorPanel").style.display = "none";
+		document.getElementById("chatMessagesInspectorPanel").style.display = "none";
 	});
 
 	editor.on('nodeRemoved', function (id) {
@@ -53,14 +65,30 @@ window.addEventListener("load", () => {
 
 
 
-
-document.getElementById("save-btn").addEventListener("click", () => {
-	sendChatStructure();
+document.getElementById("saveBtn").addEventListener("click", () => {
+	pushNodeEditorStructure();
 });
 
-document.getElementById("add-node-btn").addEventListener("click", () => {
-	addNode();
+document.getElementById("activateAddChoiceNodeMenuBtn").addEventListener("click", () => {
+	activateAddChoiceNodeMenu();
 });
+
+document.getElementById("activateAddScriptNodeMenuBtn").addEventListener("click", () => {
+	activateAddScriptNodeMenu();
+});
+
+document.getElementById("activateAddCrossChatNodeMenuBtn").addEventListener("click", () => {
+	activateAddCrossChatNodeMenu();
+});
+
+document.getElementById("addNewChoiceNodeBtn").addEventListener("click", () => {
+	addChoiceNode();
+});
+
+document.getElementById("addNewCrossNodeBtn").addEventListener("click", () => {
+	addCrossNode();
+});
+
 
 // document.getElementById("add-output").addEventListener("click", () => {
 
@@ -124,36 +152,135 @@ function toggleControlPanelVisibility(controlPanel) {
 	} else {
 		controlPanelContent.style.display = "none";
 	}
+}
 
+
+function activateAddChoiceNodeMenu() {
+	clearNewChoiceNodeInspectorPanel();
+	document.getElementById("newChoiceNodeInspectorPanel").style.display = "flex";
+}
+
+function activateAddCrossChatNodeMenu() {
+	clearNewCrossChatEventNodeInspectorPanel();
+	document.getElementById("newCrossNodeInspectorPanel").style.display = "flex";
+}
+
+function activateAddScriptNodeMenu() {
+
+}
+
+
+function loadNodePropertiesToInspectorPanel(id) {
+	const node = nodeProperties[id];
+	document.getElementById("nodeUserChoiceText").value = node.userChoiceText;
+	document.getElementById("nodeDescription").value = node.description;
+	document.getElementById("isNodeAutomaticallyStarted").checked = node.isGameEntryNode;
+	document.getElementById("nodeChatSelector").value = node.chatId;
+	document.getElementById("inspectorCurrentChatName").innerText = "Chat: " + node.chatName;
+	document.getElementById("inspectorChatHeader").innerText = node.chatName;
+}
+
+function clearNodePropertiesInInspectorPanel() {
+	document.getElementById("nodeUserChoiceText").value = "";
+	document.getElementById("nodeDescription").value = "";
+	document.getElementById("isNodeAutomaticallyStarted").checked = false;
+	document.getElementById("inspectorCurrentChatName").innerText = "  ";
+	document.getElementById("inspectorChatHeader").innerText = "No node selected";
+
+	clearMessagesContainer();
+}
+
+
+function clearNewChoiceNodeInspectorPanel() {
+	document.getElementById("newChoiceNodeChatSelector").value = "-1";
+	document.getElementById("newChoiceNodeUserChoiceText").value = "";
+	document.getElementById("newChoiceNodeDescription").value = "";
+	document.getElementById("newChoiceNodeIsNodeAutomaticallyStarted").checked = false;
+}
+
+
+function clearNewCrossChatEventNodeInspectorPanel() {
+	document.getElementById("newCrossNodeChatSelector").value = "-1";
+	document.getElementById("newCrossNodeDescription").value = "";
+	document.getElementById("newCrossNodeIsNodeAutomaticallyStarted").checked = false;
 }
 
 
 function getEditorCenter() {
-	let editorTransform = document.querySelector(".drawflow").style.transform;
-	const match = editorTransform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+	// let editorTransform = document.querySelector(".drawflow").style.transform;
+	// const match = editorTransform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
 
-	if (match) {
-		const x = parseFloat(match[1]);
-		const y = parseFloat(match[2]);
-		return [x, y];
-	} else {
-		return [0.0, 0.0];
-	}
+	// if (match) {
+	// 	const x = parseFloat(match[1]);
+	// 	const y = parseFloat(match[2]);
+	// 	return [x, y];
+	// } else {
+	// 	return [0.0, 0.0];
+	// }
+
+	let x = -1 * document.querySelector(".drawflow").getBoundingClientRect().x + 500;
+	let y = -1 * document.querySelector(".drawflow").getBoundingClientRect().y + 500
+	return { x: x, y: y };
+
 }
 
-function addNode() {
+
+function addChoiceNode() {
+	const newNodeData = {};
+
+	newNodeData.nodeType = "choice";
+	newNodeData.nodeDescription = document.getElementById("newChoiceNodeDescription").value;
+	newNodeData.nodeUserChoiceText = document.getElementById("newChoiceNodeUserChoiceText").value;
+	newNodeData.chatId = document.getElementById("newChoiceNodeChatSelector").value;
+	newNodeData.isGameEntryNode = document.getElementById("newChoiceNodeIsNodeAutomaticallyStarted").checked;
+	newNodeData.posX = getEditorCenter().x;
+	newNodeData.posY = getEditorCenter().y;
+
+	sendNewNode(newNodeData);
+}
+
+
+
+function addCrossNode() {
+	const newNodeData = {};
+
+	newNodeData.nodeType = "cross_chat_event";
+	newNodeData.nodeDescription = document.getElementById("newCrossNodeDescription").value;
+	newNodeData.chatId = document.getElementById("newCrossNodeChatSelector").value;
+	newNodeData.isGameEntryNode = document.getElementById("newCrossNodeIsNodeAutomaticallyStarted").checked;
+	newNodeData.posX = getEditorCenter().x;
+	newNodeData.posY = getEditorCenter().y;
+
+	sendNewNode(newNodeData);
+}
+
+
+// function addChoiceNodeBtn() {
+// 	let coords = [document.querySelector(".drawflow").getBoundingClientRect().x, document.querySelector(".drawflow").getBoundingClientRect().y];
+// 	console.log(coords);
+// 	const data = { "desc": "" };
+// 	editor.addNode("choice", 1, 1, -1 * coords[0] + 500, -1 * coords[1] + 500, "choiceNode", {}, defaultNodeContent);
+// 	pushNodeEditorStructure();
+// }
+
+
+function addCrossChatNode() {
 	let coords = [document.querySelector(".drawflow").getBoundingClientRect().x, document.querySelector(".drawflow").getBoundingClientRect().y];
 	console.log(coords);
 	const data = { "desc": "" };
-	editor.addNode("choice", 1, 1, -1 * coords[0] + 500, -1 * coords[1] + 500, "choiceNode", {}, defaultNodeContent);
-	sendChatStructure();
+	editor.addNode("crossChat", 1, 1, -1 * coords[0] + 500, -1 * coords[1] + 500, "crossChatNode", {}, "");
+	pushNodeEditorStructure();
+}
+
+function clearMessagesContainer() {
+	const container = document.getElementById("chatNodeId");
+	removeChildrens(container);
 }
 
 
-
 function loadMessagesToEditor(nodeId) {
+	clearMessagesContainer();
 	const container = document.getElementById("chatNodeId");
-	removeChildrens(container);
 
 	const messagesList = Object.values(messagesInNodes[parseInt(nodeId)]);
 	const messages = sortByTimestamp(messagesList);
@@ -182,8 +309,7 @@ function loadMessagesToEditor(nodeId) {
 }
 
 
-
-async function sendChatStructure() {
+async function pushNodeEditorStructure() {
 
 	let chatStructureStr = JSON.stringify(editor.export()["drawflow"]);
 
@@ -205,6 +331,28 @@ async function sendChatStructure() {
 		console.log(rq.result);
 
 	}
+}
+
+
+async function refreshNodeEditor() {
+	const rq = new Request({ url: `/get_editor_node_structure/`, data: {}, method: "GET" });
+	await rq.send();
+
+	if (rq.result === "success") {
+		const nodeStructure = rq.recievedData.nodeStructure;
+		editor.import(nodeStructure);
+	}
+	else if (rq.result === "error") {
+		console.log(rq.result);
+		if (rq.recievedData && rq.recievedData.errorMessage) {
+			warnUser("Error", rq.recievedData.errorMessage);
+		}
+		else {
+			warnUser("Error", "Unknown error.");
+		}
+	}
+
+	return rq.result;
 }
 
 
@@ -294,23 +442,18 @@ async function deleteNodeMessage(target) {
 }
 
 
-function loadNodePropertiesToControlPanel() {
-
-}
-
-
 async function sendNodeProperties() {
 
 	const nodeId = selectedNode.replace("node-", "");
 	const nodeDescription = document.getElementById("nodeDescription").value;
-	const nodeShortDescription = document.getElementById("nodeShortDescription").value;
+	const nodeUserChoiceText = document.getElementById("nodeUserChoiceText").value;
 	const nodeChatId = document.getElementById("nodeChatSelector").value;
 	const isNodeAutomaticallyStarted = document.getElementById("isNodeAutomaticallyStarted").checked;
 
 	const rqData = {
 		'nodeId': nodeId,
 		'nodeDescription': nodeDescription,
-		'nodeShortDescription': nodeShortDescription,
+		'nodeUserChoiceText': nodeUserChoiceText,
 		'chatId': nodeChatId,
 		'isEntryPoint': isNodeAutomaticallyStarted
 	}
@@ -328,3 +471,32 @@ async function sendNodeProperties() {
 
 	}
 }
+
+
+async function sendNewNode(nodeData) {
+
+	const rq = new Request({ url: "/create_node/", data: nodeData });
+	await rq.send();
+	if (rq.result === "success") {
+
+		let response = await refreshNodeEditor();
+		messagesInNodes[rq.recievedData.nodeId] = {};
+		nodeProperties[rq.recievedData.nodeId] = {
+			"userChoiceText": nodeData.nodeUserChoiceText,
+			"description": nodeData.nodeDescription,
+			"isGameEntryNode": nodeData.isEntryPoint,
+			"chatId": nodeData.chatId,
+			"chatName": chats[nodeData.chatId].name,
+			"nodeType": nodeData.type,
+		};
+		console.log(response);
+
+	} else if (rq.result === "error") {
+		if (rq.recievedData.errorMessage) {
+			warnUser("Error", rq.recievedData.errorMessage, "red");
+		}
+		else {
+			warnUser("Error", "Unknown error.");
+		}
+	}
+} 

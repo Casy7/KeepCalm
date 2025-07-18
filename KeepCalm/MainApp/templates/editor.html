@@ -36,7 +36,8 @@
 
 	<div class="inspector-panel" id="inspectorPanel">
 
-		<div class="control-panel">
+		<div class="control-panel" id="editorControlsInspectorPanel">
+			<h3 id="inspectorCurrentChatName"></h3>
 			<div class="text-center position-relative my-4 control-panel-header">
 				<hr class="m-0">
 				<span class="position-absolute top-50 start-50 translate-middle px-3 hr-header">
@@ -45,15 +46,15 @@
 			</div>
 			<div class="control-panel-content">
 				<div class="stretch-elements-container">
-					<button class="system-button save-btn stretch" id="save-btn">Save</button>
-					<button class="system-button add-node-btn stretch" id="add-node-btn">+ Choice</button>
-					<button class="system-button add-node-btn stretch" id="add-script-btn">+ Script</button>
-					<button class="system-button add-node-btn stretch" id="add-chat-btn">+ Chat</button>
+					<button class="system-button save-btn stretch" id="saveBtn">Save</button>
+					<button class="system-button add-node-btn stretch" id="activateAddChoiceNodeMenuBtn">+ Choice</button>
+					<button class="system-button add-node-btn stretch" id="activateAddScriptNodeMenuBtn">+ Script</button>
+					<button class="system-button add-node-btn stretch" id="activateAddCrossChatNodeMenuBtn">+ Cross Chat</button>
 				</div>
 			</div>
 		</div>
 
-		<div class="control-panel">
+		<div class="control-panel" id="nodeControlsInspectorPanel" style="display: none;">
 			<div class="text-center position-relative my-4 control-panel-header">
 				<hr class="m-0">
 				<span class="position-absolute top-50 start-50 translate-middle px-3 hr-header">
@@ -70,17 +71,21 @@
 					<option value="{{ chat.id }}">{{ chat.name }}</option>
 					{% endfor %}
 				</select>
-				<textarea class="form-control dark-control" id="nodeShortDescription"></textarea>
-				<textarea class="form-control dark-control" id="nodeDescription"></textarea>
+				<label for="nodeUserChoiceText">User choice text</label>
+				<textarea class="form-control dark-control" id="nodeUserChoiceText" data-bs-toggle="tooltip" data-bs-title="Оце юзер бачить у селекторі варіантів"></textarea>
+				<label for="nodeUserChoiceText">System description</label>
+				<textarea class="form-control dark-control" id="nodeDescription" data-bs-toggle="tooltip" data-bs-title="Це — опис конкретно для нас, девів. Він відображається у самому редакторі ліворуч"></textarea>
 				<button class="system-button save-btn stretch" id="saveNodePropertiesBtn">Save</button>
+				<button class="system-button save-btn stretch" id="addNodeBtn" style="display: none;">Add Node</button>
 
 			</div>
 		</div>
-		<div class="control-panel">
+
+		<div class="control-panel" id="chatMessagesInspectorPanel" style="display: none;">
 			<div class="text-center position-relative my-4 control-panel-header">
 				<hr class="m-0">
 				<span class="position-absolute top-50 start-50 translate-middle px-3 hr-header">
-					Node controls
+					Messages editor
 				</span>
 			</div>
 
@@ -88,12 +93,10 @@
 				<div class="chat-container">
 
 					<div class="nav-container">
-						<button class="system-button wheat chat-menu-btn"><img class="system-icon" src="{% static 'icons/menu.svg' %}"></button>
 
 						<img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar">
 						<div class="chat-header-col">
-							<p class="chat-header">Пед.рада школи №31</p>
-							<p class="chat-status">5 online</p>
+							<p class="chat-header" id="inspectorChatHeader"></p>
 						</div>
 
 					</div>
@@ -126,7 +129,58 @@
 			</div>
 		</div>
 
+		<div class="control-panel" id="newChoiceNodeInspectorPanel" style="display: none;">
+			<div class="text-center position-relative my-4 control-panel-header">
+				<hr class="m-0">
+				<span class="position-absolute top-50 start-50 translate-middle px-3 hr-header">
+					Add new choice node
+				</span>
+			</div>
+			<div class="control-panel-content">
+				<div class="checkbox-container">
+					<input type="checkbox" id="newChoiceNodeIsNodeAutomaticallyStarted">
+					<label for="isNodeAutomaticallyStarted">Game Entry Node</label>
+				</div>
+				<select class="form-control dark-control" id="newChoiceNodeChatSelector">
+					<option value="-1" selected>---</option>
+					{% for chat in chats %}
+					<option value="{{ chat.id }}">{{ chat.name }}</option>
+					{% endfor %}
+				</select>
+				<label for="newChoiceNodeUserChoiceText">User choice text</label>
+				<textarea class="form-control dark-control" id="newChoiceNodeUserChoiceText" data-bs-toggle="tooltip" data-bs-title="Оце юзер бачить у селекторі варіантів"></textarea>
+				<label for="newChoiceNodeDescription">System description</label>
+				<textarea class="form-control dark-control" id="newChoiceNodeDescription" data-bs-toggle="tooltip" data-bs-title="Це — опис конкретно для нас, девів. Він відображається у самому редакторі ліворуч"></textarea>
+				<button class="system-button save-btn stretch" id="addNewChoiceNodeBtn">Add Node</button>
 
+			</div>
+		</div>
+
+
+		<div class="control-panel" id="newCrossNodeInspectorPanel" style="display: none;">
+			<div class="text-center position-relative my-4 control-panel-header">
+				<hr class="m-0">
+				<span class="position-absolute top-50 start-50 translate-middle px-3 hr-header">
+					Add new cross node
+				</span>
+			</div>
+			<div class="control-panel-content">
+				<div class="checkbox-container">
+					<input type="checkbox" id="newCrossNodeIsNodeAutomaticallyStarted">
+					<label for="isNodeAutomaticallyStarted">Game Entry Node</label>
+				</div>
+				<select class="form-control dark-control" id="newCrossNodeChatSelector">
+					<option value="-1" selected>---</option>
+					{% for chat in chats %}
+					<option value="{{ chat.id }}">{{ chat.name }}</option>
+					{% endfor %}
+				</select>
+				<label for="newCrossNodeDescription">System description</label>
+				<textarea class="form-control dark-control" id="newCrossNodeDescription" data-bs-toggle="tooltip" data-bs-title="Це — опис конкретно для нас, девів. Він відображається у самому редакторі ліворуч"></textarea>
+				<button class="system-button save-btn stretch" id="addNewCrossNodeBtn">Add Node</button>
+
+			</div>
+		</div>
 
 	</div>
 
@@ -148,14 +202,17 @@
 		"deletedConnections": [],
 	};
 
-	let messagesInNodes = JSON.parse(`{{ messagesInNodes|safe }}`);
+	let chats = JSON.parse(`{{ chats_JSON|safe }}`);
+	let messagesInNodes = JSON.parse(`{{ messages_in_node|safe }}`);
 	let charactersInfo = JSON.parse(`{{ characters_JSON|safe }}`);
+	let nodeProperties = JSON.parse(`{{ node_properties|safe }}`);
 
 	let selectedNode = null;
 	let defaultNodeContent = `
 	<textarea class="form-input" df-desc="" name="description"></textarea>
 	`;
 	let editor = null;
+	let addNewNodeType = "";
 
 </script>
 {% endblock %}

@@ -98,14 +98,23 @@ export class Request {
 
 	async send() {
 		try {
-			const response = await fetch(this.url, {
+			let finalUrl = this.url;
+			let options = {
 				method: this.method,
 				headers: {
-					"Content-Type": "application/json",
 					"X-CSRFToken": getCSRFToken(),
 				},
-				body: JSON.stringify(this.data),
-			});
+			};
+
+			if (this.method.toUpperCase() === "GET") {
+				const params = new URLSearchParams(this.data).toString();
+				if (params) finalUrl += (this.url.includes("?") ? "&" : "?") + params;
+			} else {
+				options.headers["Content-Type"] = "application/json";
+				options.body = JSON.stringify(this.data);
+			}
+
+			const response = await fetch(finalUrl, options);
 
 			if (!response.ok) throw new Error(`HTTP ${response.status}`);
 			const json = await response.json();

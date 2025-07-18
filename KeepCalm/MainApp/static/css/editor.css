@@ -95,7 +95,7 @@ html, body {
 }
 
 .inspector-panel {
-	background-color: #34353a;
+	background-color: #202331;
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 	display: flex;
@@ -141,4 +141,28 @@ html, body {
 	background: unset;
 	border: 3px solid orange;
 	background-color: #6e6e43;
+}
+
+.drawflow .drawflow-node.chat-event-node {
+	background: unset;
+	border: 3px solid rgb(54, 190, 88);
+	background-color: #438033;
+}
+
+.dark-control {
+	color: white;
+	background-color: #111026;
+	border: 1px solid #7676b7;
+}
+
+.dark-control:focus {
+	color: white;
+	background-color: #111026;
+	border: 1px solid #7676b7;
+}
+
+.node-prop {
+	margin: 0px;
+	width: 100%;
+	font-size: 15px;
 }

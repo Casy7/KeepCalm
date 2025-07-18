@@ -13,6 +13,8 @@ from .views import (
 	AjaxEditorDeleteMessage,
 	AjaxCheckIfUserSessionExists,
 	AjaxUpdateNodeProperties,
+	AjaxGetEditorNodeStructure,
+	AjaxEditorCreateNode,
 	SignIn,
 	SignUp,
 	Logout,
@@ -26,9 +28,11 @@ urlpatterns = [
 
 	path("editor/", ChatEditorPage.as_view(), name="editor"),
 	path("send_chat_structure/", AjaxEditorSaveChatStructure.as_view(), name="send_chat_structure"),
+	path("create_node/", AjaxEditorCreateNode.as_view(), name="create_node"),
 	path("update_node_properties/", AjaxUpdateNodeProperties.as_view(), name="update_node_properties"),
 	path("send_node_message/", AjaxEditorSaveMessage.as_view(), name="send_node_message"),
 	path("delete_node_message/", AjaxEditorDeleteMessage.as_view(), name="delete_node_message"),
+	path("get_editor_node_structure/", AjaxGetEditorNodeStructure.as_view(), name="get_node_structure"),
 
 	path("signin/", SignIn.as_view(), name="login"),
     path("signout/", Logout.as_view(), name="logout"),
