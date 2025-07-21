@@ -6,16 +6,23 @@ from django.utils.timezone import make_aware
 
 class Chat(models.Model):
 	name = models.CharField(max_length=150)
-	is_group = models.BooleanField(default=False)
-	root_node = models.ForeignKey('ChatOptionNode', null=True, on_delete=models.SET_NULL, related_name='entry_for')
+	is_channel = models.BooleanField(default=False)
+	avatar = models.ImageField(upload_to='avatars/chats/', null=True, blank=True)
+
 
 
 class ChatOptionNode(models.Model):
 	chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+	user_choice_text = models.CharField(max_length=50, blank=True, default="")
 	description = models.CharField(max_length=250, blank=True, default="")
+	type = models.CharField(max_length=50, blank=True, default="choice")
 
 	pos_x = models.IntegerField(default=0)
 	pos_y = models.IntegerField(default=0)
+
+
+class EntryNode(models.Model):
+	node = models.OneToOneField(ChatOptionNode, on_delete=models.CASCADE, related_name="entry_points", unique=True)
 
 
 class ChatNodeLink(models.Model):
@@ -44,7 +51,7 @@ class Message(models.Model):
 	timestamp = models.DateTimeField(default=make_aware(datetime.datetime(2021, 12, 10)))
 	attached_image = models.ImageField(upload_to='chat_images/', null=True, blank=True)
 	was_read = models.BooleanField(default=False)
-	time_was_written = models.IntegerField(default=-1)
+	typing_delay_override_ms = models.IntegerField(default=-1)
 	text = models.CharField(max_length=1000)
 
 
@@ -68,4 +75,10 @@ class PlayerSession(models.Model):
 class PlayerSelectedNode(models.Model):
 	player = models.ForeignKey(PlayerSession, on_delete=models.CASCADE)
 	node = models.ForeignKey(ChatOptionNode, on_delete=models.CASCADE)
+
+	class Meta:
+		constraints = [
+			models.UniqueConstraint(fields=['player', 'node'], name='unique_player_selected_node')
+		]
+
 

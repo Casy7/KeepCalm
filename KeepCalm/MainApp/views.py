@@ -9,10 +9,12 @@ from django.contrib.auth.models import AnonymousUser
 from django.views.generic import View
 
 
-from MainApp.models import User, Chat, ChatOptionNode, ChatNodeLink, Character, Message
-from .code import chat_structure_parser as csp
+from MainApp.models import User, Chat, ChatOptionNode, ChatNodeLink, ChatMember, Character, Message, PlayerSession, PlayerSelectedNode, EntryNode
+from .utils import chat_structure_parser as csp
 
 import json
+import random
+import string
 
 
 def is_user_authenticated(request):
@@ -67,23 +69,19 @@ def base_context(request, **args):
 	return context
 
 
-class StartGamePage(View):
-	def get(self, request):
-		context = base_context(request, title='Розпочати', page_name='start_game')
-		return render(request, "start_game.html", context)
+def generate_unique_code(length=6):
+	chars = string.ascii_uppercase + string.digits
+	while True:
+		code = ''.join(random.choices(chars, k=length))
+		if not PlayerSession.objects.filter(user_session_code=code).exists():
+			return code
 
 
-class MainChatPage(View):
-	def get(self, request):
-		context = base_context(request, title='Чат: Полярний лис')
-		return render(request, "chat.html", context)
-
-
-def get_messages_in_nodes(chat_id):
+def get_messages_in_nodes():
 
 	messages_in_nodes = {}
 
-	for node in ChatOptionNode.objects.filter(chat = Chat.objects.get(id=chat_id)):
+	for node in ChatOptionNode.objects.all():
 		messages = Message.objects.filter(node=node).order_by('timestamp')
 		messages_txt = {}
 
@@ -93,7 +91,7 @@ def get_messages_in_nodes(chat_id):
 				'text': message.text,
 				'time_sent': message.timestamp.strftime("%H:%M:%S") + f".{int(message.timestamp.microsecond / 10000):02d}",
 				'timestamp': str(message.timestamp),
-				'time_was_written': message.time_was_written,
+				'time_was_written': "",
 				'was_read': message.was_read,
 				'attached_image': str(message.attached_image),
 				'username': message.user.username,
@@ -103,22 +101,105 @@ def get_messages_in_nodes(chat_id):
 			messages_txt[message.id] = message_txt
 
 		messages_in_nodes[node.id] = messages_txt
-	
+
 	return messages_in_nodes
 
 
+class StartGamePage(View):
+	def get(self, request):
+		context = base_context(request, title='Розпочати', page_name='start_game')
+		context["code"] = generate_unique_code()
+
+		return render(request, "start-game.html", context)
+
+
+class MainChatPage(View):
+	def get(self, request, session_code):
+		context = base_context(request, title='KeepCalm', page_name='game_page')
+
+		player_session = None
+		if not PlayerSession.objects.filter(user_session_code=session_code).exists():
+			player_session = PlayerSession.objects.create(user_session_code=session_code)
+
+			for entry_node in ChatOptionNode.objects.filter(entry_points__isnull=False):
+				PlayerSelectedNode.objects.create(player=player_session, node=entry_node)
+		else:
+			player_session = PlayerSession.objects.get(user_session_code=session_code)
+
+		player_selected_nodes = PlayerSelectedNode.objects.filter(player=player_session)
+
+		characters = []
+
+		for character in Character.objects.all():
+			characters.append({
+				'id': character.id,
+				'username': character.username,
+				'fullName': character.full_name,
+				'shortName': character.short_name,
+				'displayColor': character.display_color,
+				'typingSpeed': character.typing_speed,
+
+				'avatar': str(character.avatar)
+			})
+		context["characters"] = json.dumps(characters, cls=DjangoJSONEncoder)
+
+		timeline_events = []
+
+		for node in player_selected_nodes:
+
+			node_messages = Message.objects.filter(node=node.node)
+
+			for message in node_messages:
+				msg_dict = {
+					'type': "message",
+					'id': message.id,
+					'chatId': message.node.chat.id,
+					'nodeId': message.node.id,
+					'userId': message.user.id,
+					'username': message.user.username,
+					'fullName': message.user.full_name,
+					'avatar': str(message.user.avatar),
+					'displayColor': message.user.display_color,
+					'text': message.text,
+					'timestamp': str(message.timestamp),
+					'typingDelayOverride': message.typing_delay_override_ms,
+					'typingSpeed': message.user.typing_speed
+				}
+
+				timeline_events.append(msg_dict)
+
+		context["timelineEvents"] = json.dumps(timeline_events, cls=DjangoJSONEncoder)
+
+		chats = Chat.objects.all()
+		context["chats"] = chats
+
+		chats_JSON = []
+		for chat in Chat.objects.all():
+			chats_JSON.append({
+				'id': chat.id,
+				'name': chat.name,
+				'isGroup': ChatMember.objects.filter(chat=chat).count() > 1,
+				'avatar': str(chat.avatar),
+				'isChannel': chat.is_channel
+			})
+
+		context["chatsJSON"] = json.dumps(chats_JSON, cls=DjangoJSONEncoder)
+
+		context["player_session"] = player_session
+		context["session_code"] = session_code
+
+		return render(request, "chat.html", context)
+
+
 class ChatEditorPage(View):
-	def get(self, request, chat_id):
-		context = base_context(request, title='Edit')
-		context['chat_id'] = chat_id
-		context['chat_obj'] = Chat.objects.get(id=chat_id)
-		context['title'] = context['chat_obj'].name
-		context['chat_structure'] = csp.ChatStructureAdapter.to_json(context['chat_obj'])
+	def get(self, request):
+		context = base_context(request, title='Edit', page_name='editor')
 
-		messagesInNodes = get_messages_in_nodes(chat_id)
+		context['chat_structure'] = json.dumps(csp.ChatStructureAdapter.to_json(), cls=DjangoJSONEncoder)
 
+		messagesInNodes = get_messages_in_nodes()
 
-		context['messagesInNodes'] = json.dumps(messagesInNodes, cls=DjangoJSONEncoder)
+		context['messages_in_node'] = json.dumps(messagesInNodes, cls=DjangoJSONEncoder)
 
 		characters = [(character.username, character.full_name) for character in Character.objects.all()]
 		context['characters'] = characters
@@ -127,6 +208,38 @@ class ChatEditorPage(View):
 		for character in characters:
 			context['characters_JSON'][character[0]] = character[1]
 
+		chats = Chat.objects.all()
+		context["chats"] = chats
+
+		node_properties = {}
+		for node in ChatOptionNode.objects.all():
+			props = {}
+			props["chatId"] = node.chat.id
+			props["nodeId"] = node.id
+			props["type"] = node.type
+			props["chatName"] = node.chat.name
+			props["description"] = node.description
+			props["isGameEntryNode"] = EntryNode.objects.filter(node=node).exists()
+
+			if node.type == "choice":
+				props["userChoiceText"] = node.user_choice_text
+
+			node_properties[node.id] = props
+
+		chats_JSON = {}
+
+		for chat in Chat.objects.all():
+			chats_JSON[chat.id] = {
+				'id': chat.id,
+				'name': chat.name,
+				'isGroup': ChatMember.objects.filter(chat=chat).count() > 1,
+				'avatar': str(chat.avatar),
+				'isChannel': chat.is_channel
+			}
+
+		context["chats_JSON"] = json.dumps(chats_JSON, cls=DjangoJSONEncoder)
+
+		context['node_properties'] = json.dumps(node_properties, cls=DjangoJSONEncoder)
 
 		context['characters_JSON'] = json.dumps(context['characters_JSON'])
 
@@ -212,44 +325,43 @@ class SignUp(View):
 
 			context['error'] = 1
 			return render(request, "signup.html", context)
-		
+
 
 class StartGame(View):
 	def get(self, request):
 		context = base_context(
-				request, title='Нова гра', header='Реєстрація')
+			request, title='Нова гра', header='Реєстрація')
 		return render(request, "start_game.html", context)
 
 
 class AjaxEditorSaveChatStructure(View):
-	def post(self, request, chat_id):
-		form = request.POST
-		chat_structure = form['chat_structure']
+	def post(self, request):
+		form = json.loads(request.body)
+		chat_structure = form['chatStructure']
 		chat_structure = json.loads(chat_structure)
-		chat_structure = csp.ChatStructureAdapter.from_json(chat_id, chat_structure)
+		chat_structure = csp.ChatStructureAdapter.from_json(chat_structure)
 
-		result = {}
+		response = {}
 
-		chat = Chat.objects.get(id=chat_id)
-		new_structure = json.dumps(csp.ChatStructureAdapter.to_json(chat))
+		new_structure = csp.ChatStructureAdapter.to_json()
 
-		result["updatedStructure"] = new_structure
-		result["messagesInNodes"] = json.dumps(get_messages_in_nodes(chat_id))
-		result["result"] = "success"
+		response["updatedStructure"] = new_structure
+		response["messagesInNodes"] = get_messages_in_nodes()
+		response["result"] = "success"
 
 		return HttpResponse(
-			json.dumps(result),
+			json.dumps(response, cls=DjangoJSONEncoder),
 			content_type="application/json"
 		)
 
 
 class AjaxEditorSaveMessage(View):
 	def post(self, request):
-		form = request.POST
+		form = json.loads(request.body)
 
 		message = None
 
-		if form['messageId'] == '0':
+		if form['messageId'] == 0:
 			message = Message.objects.create(
 				node=ChatOptionNode.objects.get(id=form['nodeId']),
 				user=Character.objects.filter(username=form['senderCharacter'])[0]
@@ -266,29 +378,125 @@ class AjaxEditorSaveMessage(View):
 
 		message.save()
 
-		result = {}
-		result["messageId"] = message.id
-		result["result"] = "success"
+		response = {}
+		response["messageId"] = message.id
+		response["result"] = "success"
 
 		return HttpResponse(
-			json.dumps(result),
+			json.dumps(response),
 			content_type="application/json"
 		)
-	
+
 
 class AjaxEditorDeleteMessage(View):
 	def post(self, request):
-		form = request.POST
+		form = json.loads(request.body)
 
 		message = Message.objects.get(id=form['messageId'])
-		
-		result = {}
-		result["deletedMessageId"] = message.id
+
+		response = {}
+		response["deletedMessageId"] = message.id
 		message.delete()
 
-		result["result"] = "success"
+		response["result"] = "success"
 
 		return HttpResponse(
-			json.dumps(result),
+			json.dumps(response),
+			content_type="application/json"
+		)
+
+
+class AjaxCheckIfUserSessionExists(View):
+	def post(self, request):
+		data = json.loads(request.body)
+		session_code = data['userSessionCode'].replace("#", "")
+
+		response = {}
+		response["userSessionCodeExists"] = False
+		if PlayerSession.objects.filter(user_session_code=session_code).exists():
+			response["userSessionCodeExists"] = True
+
+		response["result"] = "success"
+
+		return HttpResponse(
+			json.dumps(response),
+			content_type="application/json"
+		)
+
+
+class AjaxUpdateNodeProperties(View):
+	def post(self, request):
+		data = json.loads(request.body)
+		node_id = data['nodeId']
+		node = ChatOptionNode.objects.get(id=node_id)
+		node.description = data['nodeDescription']
+		node.user_choice_text = data['nodeUserChoiceText']
+		node.chat = Chat.objects.get(id=data['chatId'])
+		is_entry_point = data['isEntryPoint']
+		if is_entry_point == True:
+			if not EntryNode.objects.filter(node=node).exists():
+				new_entry_node = EntryNode(node=node)
+				new_entry_node.save()
+		else:
+			if EntryNode.objects.filter(node=node).exists():
+				EntryNode.objects.filter(node=node)[0].delete()
+
+		node.save()
+
+		response = {}
+		response["result"] = "success"
+
+		return HttpResponse(
+			json.dumps(response),
+			content_type="application/json"
+		)
+
+
+class AjaxEditorCreateNode(View):
+	def post(self, request):
+		data = json.loads(request.body)
+		response = {}
+
+		if not Chat.objects.filter(id=data['chatId']).exists():
+			response["result"] = "error"
+			response["errorMessage"] = "Chat does not exist"
+			return HttpResponse(
+				json.dumps(response),
+				content_type="application/json"
+			)
+
+		node = ChatOptionNode.objects.create(
+			chat=Chat.objects.get(id=data['chatId']),
+			type=data['nodeType'],
+			description=data['nodeDescription'],
+			user_choice_text=data['nodeUserChoiceText'] if 'nodeUserChoiceText' in data else "",
+			pos_x=data['posX'],
+			pos_y=data['posY']
+		)
+
+		node.save()
+
+		if data['isGameEntryNode'] == True:
+			new_entry_node = EntryNode(node=node)
+			new_entry_node.save()
+
+		response["nodeId"] = node.id
+		response["result"] = "success"
+
+		return HttpResponse(
+			json.dumps(response),
+			content_type="application/json"
+		)
+
+
+class AjaxGetEditorNodeStructure(View):
+	def get(self, request):
+		response = {}
+
+		response["result"] = "success"
+		response["nodeStructure"] = csp.ChatStructureAdapter.to_json()
+
+		return HttpResponse(
+			json.dumps(response),
 			content_type="application/json"
 		)

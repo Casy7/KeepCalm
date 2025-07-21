@@ -1,12 +1,6 @@
-let selectedNode = null;
-let defaultNodeContent = `
-	<textarea class="form-input" df-desc="" name="description"></textarea>
-	`;
-let editor = null;
 
-
-
-
+import { copyTextToClipboard, warnUser, Request, removeChildrens } from './base.js';
+import Split from '../modules/split.js/split.es.js';
 
 
 function sortByTimestamp(arr) {
@@ -15,12 +9,13 @@ function sortByTimestamp(arr) {
 }
 
 
-
-
-
-
-
 window.addEventListener("load", () => {
+
+	Split(['#editorContainer', '#inspectorPanel'], {
+		minSize: 200,
+		sizes: [75, 25]
+	})
+
 	let editorId = document.getElementById("drawflow");
 
 	editor = new Drawflow(editorId);
@@ -32,7 +27,13 @@ window.addEventListener("load", () => {
 	editor.start();
 
 	editor.addModule('nameNewModule');
-	var data = { "root": 'true', "desc": "Початок чату" };
+	let data = { "root": 'true', "desc": "Початок чату" };
+
+	clearNodePropertiesInInspectorPanel();
+
+
+	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
 
 	if (chatStructureData == {}) {
@@ -45,10 +46,16 @@ window.addEventListener("load", () => {
 	editor.on('nodeSelected', function (id) {
 		selectedNode = id;
 		loadMessagesToEditor(id.replace("node-", ""));
+		loadNodePropertiesToInspectorPanel(id.replace("node-", ""));
+		document.getElementById("nodeControlsInspectorPanel").style.display = "flex";
+		document.getElementById("chatMessagesInspectorPanel").style.display = "flex";
 	});
 
 	editor.on('nodeUnselected', function () {
 		selectedNode = null;
+		clearNodePropertiesInInspectorPanel();
+		document.getElementById("nodeControlsInspectorPanel").style.display = "none";
+		document.getElementById("chatMessagesInspectorPanel").style.display = "none";
 	});
 
 	editor.on('nodeRemoved', function (id) {
@@ -58,251 +65,438 @@ window.addEventListener("load", () => {
 
 
 
-
-
-
-document.getElementById("save-btn").addEventListener("click", () => {
-	sendChatStructure();
+document.getElementById("saveBtn").addEventListener("click", () => {
+	pushNodeEditorStructure();
 });
 
-document.getElementById("add-node-btn").addEventListener("click", () => {
-	addNode();
+document.getElementById("activateAddChoiceNodeMenuBtn").addEventListener("click", () => {
+	activateAddChoiceNodeMenu();
 });
 
-document.getElementById("add-output").addEventListener("click", () => {
-
-	// const selectedId = selectedNode;
-
-	// if (!selectedId) {
-	// 	console.warn("No node selected.");
-	// 	return;
-	// }
-
-	// editor.addNodeOutput(selectedId);
-	// editor.updateConnectionNodes(`node-${selectedId}`);
+document.getElementById("activateAddScriptNodeMenuBtn").addEventListener("click", () => {
+	activateAddScriptNodeMenu();
 });
 
-document.getElementById("remove-output").addEventListener("click", () => {
-	// const selectedId = selectedNode;
-
-	// if (!selectedId) {
-	// 	console.warn("No node selected.");
-	// 	return;
-	// }
-
-	// const node = editor.getNodeFromId(selectedId);
-	// const outputCount = Object.keys(node.outputs).length;
-
-	// if (outputCount === 0) {
-	// 	console.warn("No nodes to remove.");
-	// 	return;
-	// }
-
-	// let outputs = Object.keys(node.outputs);
-
-	// const output_class = outputs[outputs.length - 1];
-
-	// editor.removeNodeOutput(selectedId, output_class)
-	// editor.updateConnectionNodes(`node-${selectedId}`);
+document.getElementById("activateAddCrossChatNodeMenuBtn").addEventListener("click", () => {
+	activateAddCrossChatNodeMenu();
 });
+
+document.getElementById("addNewChoiceNodeBtn").addEventListener("click", () => {
+	addChoiceNode();
+});
+
+document.getElementById("addNewCrossNodeBtn").addEventListener("click", () => {
+	addCrossNode();
+});
+
+
+// document.getElementById("add-output").addEventListener("click", () => {
+
+// const selectedId = selectedNode;
+
+// if (!selectedId) {
+// 	console.warn("No node selected.");
+// 	return;
+// }
+
+// editor.addNodeOutput(selectedId);
+// editor.updateConnectionNodes(`node-${selectedId}`);
+// });
+
+// document.getElementById("remove-output").addEventListener("click", () => {
+// const selectedId = selectedNode;
+
+// if (!selectedId) {
+// 	console.warn("No node selected.");
+// 	return;
+// }
+
+// const node = editor.getNodeFromId(selectedId);
+// const outputCount = Object.keys(node.outputs).length;
+
+// if (outputCount === 0) {
+// 	console.warn("No nodes to remove.");
+// 	return;
+// }
+
+// let outputs = Object.keys(node.outputs);
+
+// const output_class = outputs[outputs.length - 1];
+
+// editor.removeNodeOutput(selectedId, output_class)
+// editor.updateConnectionNodes(`node-${selectedId}`);
+// });
 
 document.getElementById("sendNewMessageBtn").addEventListener("click", () => {
 	sendNodeMessage();
 });
 
-$("#chatNodeId").on('click', '.message-delete-btn', function () {
+document.getElementById("chatNodeId").addEventListener("click", () => {
 	deleteNodeMessage(this);
 });
 
-function getEditorCenter() {
-	let editorTransform = document.querySelector(".drawflow").style.transform;
-	const match = editorTransform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+document.querySelectorAll(".control-panel-header").forEach(controlPanelHeader => controlPanelHeader.addEventListener("click", (event) => {
+	toggleControlPanelVisibility(event.target);
+}))
 
-	if (match) {
-		const x = parseFloat(match[1]);
-		const y = parseFloat(match[2]);
-		return [x, y];
+document.getElementById("saveNodePropertiesBtn").addEventListener("click", () => {
+	sendNodeProperties();
+})
+
+
+function toggleControlPanelVisibility(controlPanel) {
+	console.log(controlPanel);
+	let controlPanelContent = controlPanel.parentNode.parentNode.querySelector(".control-panel-content");
+	if (controlPanelContent.style.display == "none") {
+		controlPanelContent.style.display = "block";
 	} else {
-		return [0.0, 0.0];
+		controlPanelContent.style.display = "none";
 	}
 }
 
-function addNode() {
+
+function activateAddChoiceNodeMenu() {
+	clearNewChoiceNodeInspectorPanel();
+	document.getElementById("newChoiceNodeInspectorPanel").style.display = "flex";
+}
+
+function activateAddCrossChatNodeMenu() {
+	clearNewCrossChatEventNodeInspectorPanel();
+	document.getElementById("newCrossNodeInspectorPanel").style.display = "flex";
+}
+
+function activateAddScriptNodeMenu() {
+
+}
+
+
+function loadNodePropertiesToInspectorPanel(id) {
+	const node = nodeProperties[id];
+	document.getElementById("nodeUserChoiceText").value = node.userChoiceText;
+	document.getElementById("nodeDescription").value = node.description;
+	document.getElementById("isNodeAutomaticallyStarted").checked = node.isGameEntryNode;
+	document.getElementById("nodeChatSelector").value = node.chatId;
+	document.getElementById("inspectorCurrentChatName").innerText = "Chat: " + node.chatName;
+	document.getElementById("inspectorChatHeader").innerText = node.chatName;
+}
+
+function clearNodePropertiesInInspectorPanel() {
+	document.getElementById("nodeUserChoiceText").value = "";
+	document.getElementById("nodeDescription").value = "";
+	document.getElementById("isNodeAutomaticallyStarted").checked = false;
+	document.getElementById("inspectorCurrentChatName").innerText = "  ";
+	document.getElementById("inspectorChatHeader").innerText = "No node selected";
+
+	clearMessagesContainer();
+}
+
+
+function clearNewChoiceNodeInspectorPanel() {
+	document.getElementById("newChoiceNodeChatSelector").value = "-1";
+	document.getElementById("newChoiceNodeUserChoiceText").value = "";
+	document.getElementById("newChoiceNodeDescription").value = "";
+	document.getElementById("newChoiceNodeIsNodeAutomaticallyStarted").checked = false;
+}
+
+
+function clearNewCrossChatEventNodeInspectorPanel() {
+	document.getElementById("newCrossNodeChatSelector").value = "-1";
+	document.getElementById("newCrossNodeDescription").value = "";
+	document.getElementById("newCrossNodeIsNodeAutomaticallyStarted").checked = false;
+}
+
+
+function getEditorCenter() {
+	// let editorTransform = document.querySelector(".drawflow").style.transform;
+	// const match = editorTransform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+
+	// if (match) {
+	// 	const x = parseFloat(match[1]);
+	// 	const y = parseFloat(match[2]);
+	// 	return [x, y];
+	// } else {
+	// 	return [0.0, 0.0];
+	// }
+
+	let x = -1 * document.querySelector(".drawflow").getBoundingClientRect().x + 500;
+	let y = -1 * document.querySelector(".drawflow").getBoundingClientRect().y + 500
+	return { x: x, y: y };
+
+}
+
+
+function addChoiceNode() {
+	const newNodeData = {};
+
+	newNodeData.nodeType = "choice";
+	newNodeData.nodeDescription = document.getElementById("newChoiceNodeDescription").value;
+	newNodeData.nodeUserChoiceText = document.getElementById("newChoiceNodeUserChoiceText").value;
+	newNodeData.chatId = document.getElementById("newChoiceNodeChatSelector").value;
+	newNodeData.isGameEntryNode = document.getElementById("newChoiceNodeIsNodeAutomaticallyStarted").checked;
+	newNodeData.posX = getEditorCenter().x;
+	newNodeData.posY = getEditorCenter().y;
+
+	sendNewNode(newNodeData);
+}
+
+
+
+function addCrossNode() {
+	const newNodeData = {};
+
+	newNodeData.nodeType = "cross_chat_event";
+	newNodeData.nodeDescription = document.getElementById("newCrossNodeDescription").value;
+	newNodeData.chatId = document.getElementById("newCrossNodeChatSelector").value;
+	newNodeData.isGameEntryNode = document.getElementById("newCrossNodeIsNodeAutomaticallyStarted").checked;
+	newNodeData.posX = getEditorCenter().x;
+	newNodeData.posY = getEditorCenter().y;
+
+	sendNewNode(newNodeData);
+}
+
+
+// function addChoiceNodeBtn() {
+// 	let coords = [document.querySelector(".drawflow").getBoundingClientRect().x, document.querySelector(".drawflow").getBoundingClientRect().y];
+// 	console.log(coords);
+// 	const data = { "desc": "" };
+// 	editor.addNode("choice", 1, 1, -1 * coords[0] + 500, -1 * coords[1] + 500, "choiceNode", {}, defaultNodeContent);
+// 	pushNodeEditorStructure();
+// }
+
+
+function addCrossChatNode() {
 	let coords = [document.querySelector(".drawflow").getBoundingClientRect().x, document.querySelector(".drawflow").getBoundingClientRect().y];
 	console.log(coords);
-	data = { "desc": "" };
-	editor.addNode("choice", 1, 1, -1 * coords[0] + 500, -1 * coords[1] + 500, "choiceNode", {}, defaultNodeContent);
-	sendChatStructure();
+	const data = { "desc": "" };
+	editor.addNode("crossChat", 1, 1, -1 * coords[0] + 500, -1 * coords[1] + 500, "crossChatNode", {}, "");
+	pushNodeEditorStructure();
+}
+
+function clearMessagesContainer() {
+	const container = document.getElementById("chatNodeId");
+	removeChildrens(container);
 }
 
 
 function loadMessagesToEditor(nodeId) {
-	removeChildrens(byId("chatNodeId"));
-	let messages_list = Object.values(messagesInNodes[parseInt(nodeId)]);
-	let messages = sortByTimestamp(messages_list);
+	clearMessagesContainer();
+	const container = document.getElementById("chatNodeId");
+
+	const messagesList = Object.values(messagesInNodes[parseInt(nodeId)]);
+	const messages = sortByTimestamp(messagesList);
+
 	for (let i = 0; i < messages.length; i++) {
-		let message = messages[parseInt(i)];
-		$("#chatNodeId").append(`
-		<div class="message-wrapper incoming">
-			<img class="message-avatar" src="{% static 'images/users/code.jpg' %}" alt="avatar">
-			<div class="messages-block">
-				<div class="message user-2">
-					<div class="message-username">`+ message.full_name + `</div>
-					<div class="message-content-line" id="message-`+ message.id + `">
-						<p class="message-text">`+ message.text + `</p>
-						<label class="message-timestamp">`+ message.time_sent + `</label>
-						<a class="message-timestamp message-delete-btn" data-value="`+ message.id + `">Del.</a>
+		const message = messages[i];
+
+		const template = `
+			<div class="message-wrapper incoming">
+				<img class="message-avatar" src="/static/images/users/code.jpg" alt="avatar">
+				<div class="messages-block">
+					<div class="message user-2">
+						<div class="message-username">${message.full_name}</div>
+						<div class="message-content-line" id="message-${message.id}">
+							<p class="message-text">${message.text}</p>
+							<label class="message-timestamp">${message.time_sent}</label>
+							<a class="message-timestamp message-delete-btn" data-value="${message.id}">Del.</a>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-			`
-		);
+		`;
+
+		container.insertAdjacentHTML("beforeend", template);
 	}
 }
 
 
-function sendChatStructure() {
+async function pushNodeEditorStructure() {
 
-	let chat_structure_send = JSON.stringify(editor.export()["drawflow"]);
+	let chatStructureStr = JSON.stringify(editor.export()["drawflow"]);
 
-	$.ajax({
-		url: "/send_chat_structure/" + chatId + "/",
-		type: 'POST',
-		data: {
-			'chat_structure': chat_structure_send
-		},
-		beforeSend: function (xhr) {
-			attachCSRFToken(xhr);
-		},
-		success: function a(json) {
-			if (json.result === "success") {
-				editor.import(JSON.parse(JSON.parse(json.updatedStructure)));
-				messagesInNodes = JSON.parse(json.messagesInNodes);
-				warnUser("Saved!", "");
-				
-			} else {
-			}
-		}
-	});
+	let rqData = {
+		'chatStructure': chatStructureStr
+	}
+
+	const rq = new Request({ url: `/send_chat_structure/`, data: rqData });
+	await rq.send();
+
+	if (rq.result === "success") {
+		const updatedStructure = rq.recievedData.updatedStructure;
+		editor.import(updatedStructure);
+		messagesInNodes = rq.recievedData.messagesInNodes;
+		warnUser("Saved!", "");
+
+	} else {
+
+		console.log(rq.result);
+
+	}
 }
 
 
-function sendNodeMessage() {
+async function refreshNodeEditor() {
+	const rq = new Request({ url: `/get_editor_node_structure/`, data: {}, method: "GET" });
+	await rq.send();
+
+	if (rq.result === "success") {
+		const nodeStructure = rq.recievedData.nodeStructure;
+		editor.import(nodeStructure);
+	}
+	else if (rq.result === "error") {
+		console.log(rq.result);
+		if (rq.recievedData && rq.recievedData.errorMessage) {
+			warnUser("Error", rq.recievedData.errorMessage);
+		}
+		else {
+			warnUser("Error", "Unknown error.");
+		}
+	}
+
+	return rq.result;
+}
+
+
+async function sendNodeMessage() {
 
 	let messageId = 0;
 	let nodeId = selectedNode.replace("node-", "");
-	let messageText = byId("messageText").value;
-	let senderCharacter = byId("senderCharacter").value;
-	let dateWasWritten = byId("dateWasWritten").value;
-	let timeWasWritten = byId("timeWasWritten").value;
-	let timeSWasWritten = byId("timeSWasWritten").value;
-	let timeMsWasWritten = byId("timeMsWasWritten").value;
+	let messageText = document.getElementById("messageText").value;
+	let senderCharacter = document.getElementById("senderCharacter").value;
+	let dateWasWritten = document.getElementById("dateWasWritten").value;
+	let timeWasWritten = document.getElementById("timeWasWritten").value;
+	let timeSWasWritten = document.getElementById("timeSWasWritten").value;
+	let timeMsWasWritten = document.getElementById("timeMsWasWritten").value;
 
+	let rqData = {
+		'messageId': messageId,
+		'nodeId': nodeId,
+		'messageText': messageText,
+		'senderCharacter': senderCharacter,
+		'dateWasWritten': dateWasWritten,
+		'timeWasWritten': timeWasWritten,
+		'timeSWasWritten': timeSWasWritten,
+		'timeMsWasWritten': timeMsWasWritten
+	}
 
-	$.ajax({
-		url: "/send_node_message/",
-		type: 'POST',
-		data: {
-			'messageId': messageId,
-			'nodeId': nodeId,
-			'messageText': messageText,
-			'senderCharacter': senderCharacter,
-			'dateWasWritten': dateWasWritten,
-			'timeWasWritten': timeWasWritten,
-			'timeSWasWritten': timeSWasWritten,
-			'timeMsWasWritten': timeMsWasWritten
-		},
-		beforeSend: function (xhr) {
-			attachCSRFToken(xhr);
-		},
-		success: function a(json) {
-			if (json.result === "success") {
-				let newMessageId = json.messageId;
-				messagesInNodes[parseInt(nodeId)][parseInt(newMessageId)] = {
-					"id": newMessageId,
-					"text": messageText,
-					"time_was_written": timeWasWritten,
-					"time_sent": timeWasWritten + ":" + timeSWasWritten + ":" + timeMsWasWritten,
-					"timestamp": dateWasWritten + " " + timeWasWritten + ":" + timeSWasWritten + "." + timeMsWasWritten + "+00:00",
-					"was_read": false,
-					"attached_image": "",
-					"username": senderCharacter,
-					"full_name": charactersInfo[senderCharacter]
-				};
-				console.log("success");
-				loadMessagesToEditor(nodeId);
-			} else {
-			}
-		}
-	});
+	const rq = new Request({ url: "/send_node_message/", data: rqData });
+	await rq.send();
+
+	if (rq.result === "success") {
+		let newMessageId = rq.messageId;
+		messagesInNodes[parseInt(nodeId)][parseInt(newMessageId)] = {
+			"id": newMessageId,
+			"text": messageText,
+			"time_was_written": timeWasWritten,
+			"time_sent": timeWasWritten + ":" + timeSWasWritten + ":" + timeMsWasWritten,
+			"timestamp": dateWasWritten + " " + timeWasWritten + ":" + timeSWasWritten + "." + timeMsWasWritten + "+00:00",
+			"was_read": false,
+			"attached_image": "",
+			"username": senderCharacter,
+			"full_name": charactersInfo[senderCharacter]
+		};
+		console.log("success");
+		loadMessagesToEditor(nodeId);
+	} else {
+		console.warn("Не вдалось відправити повідомлення.");
+	}
+
 }
 
-function deleteNodeMessage(target) {
+async function deleteNodeMessage(target) {
+
 	console.log(target);
+	const messageId = target.getAttribute("data-value");
 
-	let messageId = target.getAttribute("data-value");
+	let rqData = {
+		'messageId': messageId
+	}
+	const rq = new Request({ url: "/delete_node_message/", data: rqData });
+	await rq.send();
 
-	$.ajax({
-		url: "/delete_node_message/",
-		type: 'POST',
-		data: {
-			'messageId': messageId,
-		},
-		beforeSend: function (xhr) {
-			attachCSRFToken(xhr);
-		},
-		success: function a(json) {
-			if (json.result === "success") {
-				let deletedMessageId = json.deletedMessageId;
+	if (rq.result === "success") {
 
+		const deletedMessageId = rq.deletedMessageId;
+		const messagesBlock = target.closest('.message-wrapper');
 
-				const messagesBlock = target.closest('.message-wrapper');
-				
-				target.parentNode.remove();
-
-				if (!messagesBlock) return; // если нет — выходим				
-
-				const remaining = messagesBlock.querySelectorAll('.message-content-line');
-				if (remaining.length === 0) {
-					messagesBlock.remove();
-				}
-
-				nodeId = selectedNode.replace("node-", "");
-				delete messagesInNodes[parseInt(nodeId)][parseInt(deletedMessageId)];
-				console.log("success");
-				loadMessagesToEditor(nodeId);
-			} else {
-			}
+		target.parentNode.remove();
+		if (!messagesBlock) {
+			return;
 		}
-	});
+
+		const remaining = messagesBlock.querySelectorAll('.message-content-line');
+		if (remaining.length === 0) {
+			messagesBlock.remove();
+		}
+
+		nodeId = selectedNode.replace("node-", "");
+		delete messagesInNodes[parseInt(nodeId)][parseInt(deletedMessageId)];
+		console.log("success");
+		loadMessagesToEditor(nodeId);
+
+	} else {
+
+		console.warn("Не вдалось видалити повідомлення.");
+
+	}
+
 }
 
 
+async function sendNodeProperties() {
 
+	const nodeId = selectedNode.replace("node-", "");
+	const nodeDescription = document.getElementById("nodeDescription").value;
+	const nodeUserChoiceText = document.getElementById("nodeUserChoiceText").value;
+	const nodeChatId = document.getElementById("nodeChatSelector").value;
+	const isNodeAutomaticallyStarted = document.getElementById("isNodeAutomaticallyStarted").checked;
 
+	const rqData = {
+		'nodeId': nodeId,
+		'nodeDescription': nodeDescription,
+		'nodeUserChoiceText': nodeUserChoiceText,
+		'chatId': nodeChatId,
+		'isEntryPoint': isNodeAutomaticallyStarted
+	}
 
+	const rq = new Request({ url: "/update_node_properties/", data: rqData });
+	await rq.send();
 
-function warnUser(title, desc) {
-    const container = document.getElementById('warn-container');
+	if (rq.result === "success") {
 
-    const toast = document.createElement('div');
-    toast.className = 'warn-toast';
+		warnUser("Saved!", "");
 
-    const titleEl = document.createElement('div');
-    titleEl.className = 'warn-title';
-    titleEl.textContent = title;
+	} else {
 
-    const descEl = document.createElement('div');
-    descEl.textContent = desc;
+		warnUser("Error!", "Cannot save properties.");
 
-    toast.appendChild(titleEl);
-    toast.appendChild(descEl);
-    container.appendChild(toast);
-
-    // Remove after 4 seconds
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => container.removeChild(toast), 500); // wait for fadeout
-    }, 4000);
+	}
 }
+
+
+async function sendNewNode(nodeData) {
+
+	const rq = new Request({ url: "/create_node/", data: nodeData });
+	await rq.send();
+	if (rq.result === "success") {
+
+		let response = await refreshNodeEditor();
+		messagesInNodes[rq.recievedData.nodeId] = {};
+		nodeProperties[rq.recievedData.nodeId] = {
+			"userChoiceText": nodeData.nodeUserChoiceText,
+			"description": nodeData.nodeDescription,
+			"isGameEntryNode": nodeData.isEntryPoint,
+			"chatId": nodeData.chatId,
+			"chatName": chats[nodeData.chatId].name,
+			"nodeType": nodeData.type,
+		};
+		console.log(response);
+
+	} else if (rq.result === "error") {
+		if (rq.recievedData.errorMessage) {
+			warnUser("Error", rq.recievedData.errorMessage, "red");
+		}
+		else {
+			warnUser("Error", "Unknown error.");
+		}
+	}
+} 

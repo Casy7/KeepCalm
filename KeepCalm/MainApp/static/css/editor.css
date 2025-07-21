@@ -11,9 +11,6 @@ html, body {
 	border: 1px solid #888;
 }
 
-#content {
-	width: 95vw;
-}
 
 .game-container {
 	width: 100vw;
@@ -52,11 +49,6 @@ html, body {
 	cursor: pointer;
 }
 
-.chat-container {
-	width: 36vw;
-	height: 85vh;
-}
-
 .message {
 	max-width: 255px;
 }
@@ -71,33 +63,106 @@ html, body {
 	max-width: initial;
 }
 
-
-
-
-.warn-toast {
-    background-color: #ff4444;
-    color: white;
-    padding: 12px 16px;
-    border-radius: 5px;
-    min-width: 220px;
-    max-width: 300px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    font-family: sans-serif;
-    animation: fadein 0.3s ease, fadeout 0.5s ease 3.5s;
-    opacity: 1;
-    transition: opacity 0.5s ease;
+.chat-container {
+	width: auto;
 }
 
-.warn-title {
-    font-weight: bold;
-    margin-bottom: 4px;
+
+.editor-container {
+	border: 1px solid green;
 }
 
-@keyframes fadein {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+#content {
+	flex-direction: row;
+	/* border: 3px solid red; */
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
 }
 
-@keyframes fadeout {
-    to { opacity: 0; transform: translateY(10px); }
+.drawflow .drawflow-node .drawflow_content_node {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+}
+
+.root-node-label {
+	color: #97ee8b;
+	font-size: 0.9em;
+	font-family: "Roboto", "Roboto-Black", Tahoma;
+}
+
+.inspector-panel {
+	background-color: #202331;
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+	display: flex;
+	flex-direction: column;
+	overflow-y: scroll;
+	min-width: 20vw;
+}
+
+.stretch-elements-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.stretch-elements-container button {
+	flex-grow: 1;
+}
+
+.split-view {
+	display: flex;
+	flex-direction: row;
+	width: inherit;
+	height: inherit;
+}
+
+.gutter {
+	background-color: #606a7d;
+	background-repeat: no-repeat;
+	background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+	cursor: col-resize;
+}
+
+.hr-header {
+	background-color: #606a7d;
+	color: white;
+}
+
+.drawflow .drawflow-node.entry-node {
+	background: unset;
+	border: 3px solid orange;
+	background-color: #6e6e43;
+}
+
+.drawflow .drawflow-node.chat-event-node {
+	background: unset;
+	border: 3px solid rgb(54, 190, 88);
+	background-color: #438033;
+}
+
+.dark-control {
+	color: white;
+	background-color: #111026;
+	border: 1px solid #7676b7;
+}
+
+.dark-control:focus {
+	color: white;
+	background-color: #111026;
+	border: 1px solid #7676b7;
+}
+
+.node-prop {
+	margin: 0px;
+	width: 100%;
+	font-size: 15px;
 }

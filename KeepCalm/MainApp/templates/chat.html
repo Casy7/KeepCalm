@@ -6,35 +6,61 @@
   type="text/css"
 />
 {% endblock %} {% block content %}
-
 <div class="game-container">
   <div class="chat-container">
     <div class="nav-container">
       <button class="system-button wheat chat-menu-btn">
         <img class="system-icon" src="{% static 'icons/menu.svg' %}" />
       </button>
-      <p class="messager-header">Rawrgram</p>
+      <p class="messager-header">Pawgram</p>
     </div>
 
     <div class="chats">
-      <div class="chat">
+      {% for chat in chats %}
+      <div
+        class="chat chat-menu-line"
+        id="chat-{{ chat.id }}"
+        data-chat-id="{{ chat.id }}"
+        role="button"
+        tabindex="0"
+      >
+        {% if chat.avatar.name != "" %}
+        <img
+          class="message-avatar chat-icon"
+          src="{{ chat.avatar.url }}"
+          alt="avatar"
+        />
+        {% else %}
         <img
           class="message-avatar chat-icon"
           src="{% static 'images/chat_avatars/pedrada.png' %}"
           alt="avatar"
         />
+        {% endif %}
         <div class="chat-info">
-          <p class="chat-header">Пед.рада школи №31</p>
-          <p class="chat-last-message">
-            Алкоголь — це єдине що підтримує в мені жття
+          <p class="chat-header">{{ chat.name }}</p>
+          <p class="chat-last-message" id="chat{{ chat.id }}LastMessage">
+            Ще немає повідомлень
           </p>
         </div>
 
         <div class="chat-status">
-          <div class="chat-unread-mesages">1</div>
-          <p class="last-message-timestamp">08:08</p>
+          <div
+            class="chat-unread-mesages"
+            id="chat{{ chat.id }}UnreadMessagesCounter"
+            style="display: none"
+          >
+            0
+          </div>
+          <p
+            class="last-message-timestamp"
+            id="chat{{ chat.id }}LastMessageTimestamp"
+          >
+            08:08
+          </p>
         </div>
       </div>
+      {% endfor %}
     </div>
   </div>
 
@@ -50,8 +76,8 @@
         alt="avatar"
       />
       <div class="chat-header-col">
-        <p class="chat-header">Пед.рада школи №31</p>
-        <p class="chat-status">5 online</p>
+        <p class="chat-header" id="activeChatHeader">Пед.рада школи №31</p>
+        <p class="chat-status" id="chatStatus">5 online</p>
       </div>
     </div>
 
@@ -220,4 +246,31 @@
   </div>
 </div>
 
+<div class="debug-time-controller">
+  <button class="system-button" id="decrease-time">Stop|Start</button>
+  <button class="system-button" id="decreaseTimeByOneHour">--</button>
+  <button class="system-button" id="decreaseTimeByOneMinute">-</button>
+  <input type="text" class="debug-time-field" id="debugTime" />
+  <button class="system-button" id="increaseTimeByOneMinute">+</button>
+  <button class="system-button" id="increaseTimeByOneHour">++</button>
+  <button class="system-button" id="set-new-time">Set New Time</button>
+</div>
+{% endblock %} {% block js_data %}
+<script>
+  let timelineEventsJSON = JSON.parse(`{{ timelineEvents|safe }}`);
+  let users = JSON.parse(`{{ characters|safe }}`);
+  let chats = JSON.parse(`{{ chatsJSON|safe }}`);
+
+  let timelineEvents = null;
+  let timelineEventManager = null;
+  let gameTimeManager = null;
+  let debugTimeController = null;
+  let eventRenderer = null;
+  let typingIndicatorManager = null;
+  let activeChatId = -1;
+
+  const MS_PER_CHAR = 100;
+</script>
+{% endblock %} {% block page_scripts %}
+<script src="{% static 'js/chat.js' %}" type="module"></script>
 {% endblock %}

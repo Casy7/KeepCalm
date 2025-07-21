@@ -172,6 +172,21 @@
   justify-content: center;
 }
 
+.active-chat {
+  background-color: #3b6680;
+}
+
+.empty-message {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #b3b3b3;
+  font-size: 1.2em;
+  font-family: "Roboto", "Roboto-Black", Tahoma;
+}
+
 .input-container button img {
   filter: invert(39%) sepia(80%) saturate(61%) hue-rotate(10deg) brightness(90%)
     contrast(90%);
@@ -218,17 +233,4 @@
 .chat-status {
   color: wheat;
   margin-top: -2px;
-}
-
-.message.option {
-  border: 2px solid #3b6680;
-  background: transparent;
-}
-.message.option:hover {
-  background-color: #3b6680;
-  cursor: pointer;
-}
-
-.message.option .message-text:hover {
-  color: #ffffff;
 }
