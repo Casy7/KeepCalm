@@ -66,7 +66,6 @@ class ChatStructureAdapter:
 		for chat in Chat.objects.all():
 			ChatStructureAdapter.check_if_any_node_deleted(chat, tree_root)
 
-		pass
 
 	@staticmethod
 	def to_json():
@@ -99,15 +98,13 @@ class ChatStructureAdapter:
 			is_entry_point = EntryNode.objects.filter(node=node).exists()
 			if is_entry_point:
 				chat_rn = node.chat
-				root_node_label_template = f"<small class='root-node-label'>Game Entry Point</small>"
+				root_node_label_template = "<small class='root-node-label'>Game Entry Point</small>"
 				classes+= " entry-node"
 
 
 			# root_node_label_template = f"<small class='root-node-label'>Root for C: {str(chat_rn.id)} — {chat_rn.name}</small>"
 
-			chat_name_label_template = f"<p class='node-prop'>node id: {str(node.id)}</p><p class='node-prop chat-name'>chat: {str(node.chat.id)} — {node.chat.name}</p>"
-
-			node_type_template = ""
+			chat_name_label_template = f"<p class='node-prop'>N{str(node.id)} — {node.type}</p><p class='node-prop chat-name'>chat: {str(node.chat.id)} — {node.chat.name}</p>"
 
 			if node.type == "cross_chat_event":
 				classes += " chat-event-node"
@@ -123,7 +120,7 @@ class ChatStructureAdapter:
 					'chatName': node.chat.name,
 				},
 				'class': 'chatNode' + classes,
-				'html': root_node_label_template + chat_name_label_template + f"<p class='node-prop node-type'>type: {node.type}</p><textarea class='form-input' df-desc name='description'></textarea>",
+				'html': root_node_label_template + chat_name_label_template + "<textarea class='form-input' df-desc name='description'></textarea>",
 				'typenode': False,
 				'inputs': {
 					'input_1': {

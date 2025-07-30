@@ -1,121 +1,31 @@
+import json
+from datetime import datetime
+
+
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
-from datetime import datetime
 from django.core.serializers.json import DjangoJSONEncoder
-
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import AnonymousUser
-
 from django.views.generic import View
 
 
-from MainApp.models import User, Chat, ChatOptionNode, ChatNodeLink, ChatMember, Character, Message, PlayerSession, PlayerSelectedNode, EntryNode
+from MainApp.models import User, Chat, ChatOptionNode, ChatMember, Character, Message, PlayerSession, PlayerSelectedNode, EntryNode
 from .utils import chat_structure_parser as csp
-
-import json
-import random
-import string
-
-
-def is_user_authenticated(request):
-	user = request.user
-	user_validation_properties = [
-		request.user != None,
-		not request.user.is_anonymous,
-		type(request.user) != AnonymousUser,
-		len(User.objects.filter(username=user.username)) != 0,
-		user.is_active
-	]
-	return not False in user_validation_properties
-
-
-def full_name(user):
-	if user.last_name != '' and user.first_name != '':
-		return user.first_name+' '+user.last_name
-	elif user.first_name != '':
-		return user.first_name
-	elif user.last_name != '':
-		return user.last_name
-	else:
-		return user.username
-
-
-def base_context(request, **args):
-	context = {}
-	user = request.user
-
-	context['title'] = 'none'
-	context['user'] = 'none'
-	context['header'] = 'none'
-	context['error'] = 0
-	context['message'] = ''
-	context['is_superuser'] = False
-	context['self_user_has_avatar'] = False
-	context['page_name'] = 'default'
-
-	if is_user_authenticated(request):
-
-		context['username'] = user.username
-		context['full_name'] = full_name(user)
-		context['user'] = user
-
-		if request.user.is_superuser:
-			context['is_superuser'] = True
-
-	if args != None:
-		for arg in args:
-			context[arg] = args[arg]
-
-	return context
-
-
-def generate_unique_code(length=6):
-	chars = string.ascii_uppercase + string.digits
-	while True:
-		code = ''.join(random.choices(chars, k=length))
-		if not PlayerSession.objects.filter(user_session_code=code).exists():
-			return code
-
-
-def get_messages_in_nodes():
-
-	messages_in_nodes = {}
-
-	for node in ChatOptionNode.objects.all():
-		messages = Message.objects.filter(node=node).order_by('timestamp')
-		messages_txt = {}
-
-		for message in messages:
-			message_txt = {
-				'id': message.id,
-				'text': message.text,
-				'time_sent': message.timestamp.strftime("%H:%M:%S") + f".{int(message.timestamp.microsecond / 10000):02d}",
-				'timestamp': str(message.timestamp),
-				'time_was_written': "",
-				'was_read': message.was_read,
-				'attached_image': str(message.attached_image),
-				'username': message.user.username,
-				'full_name': message.user.full_name
-			}
-
-			messages_txt[message.id] = message_txt
-
-		messages_in_nodes[node.id] = messages_txt
-
-	return messages_in_nodes
+from .utils.session_manager import SessionManager
+from .utils.frontend_data_adapter import FrontendDataAdapter
 
 
 class StartGamePage(View):
 	def get(self, request):
-		context = base_context(request, title='Розпочати', page_name='start_game')
-		context["code"] = generate_unique_code()
+		context = SessionManager.base_context(request, title='Розпочати', page_name='start_game')
+		context["code"] = SessionManager.generate_session_code()
 
 		return render(request, "start-game.html", context)
 
 
 class MainChatPage(View):
 	def get(self, request, session_code):
-		context = base_context(request, title='KeepCalm', page_name='game_page')
+		context = SessionManager.base_context(request, title='KeepCalm', page_name='game_page')
 
 		player_session = None
 		if not PlayerSession.objects.filter(user_session_code=session_code).exists():
@@ -131,16 +41,7 @@ class MainChatPage(View):
 		characters = []
 
 		for character in Character.objects.all():
-			characters.append({
-				'id': character.id,
-				'username': character.username,
-				'fullName': character.full_name,
-				'shortName': character.short_name,
-				'displayColor': character.display_color,
-				'typingSpeed': character.typing_speed,
-
-				'avatar': str(character.avatar)
-			})
+			characters.append(FrontendDataAdapter.adapt(character))
 		context["characters"] = json.dumps(characters, cls=DjangoJSONEncoder)
 
 		timeline_events = []
@@ -150,21 +51,7 @@ class MainChatPage(View):
 			node_messages = Message.objects.filter(node=node.node)
 
 			for message in node_messages:
-				msg_dict = {
-					'type': "message",
-					'id': message.id,
-					'chatId': message.node.chat.id,
-					'nodeId': message.node.id,
-					'userId': message.user.id,
-					'username': message.user.username,
-					'fullName': message.user.full_name,
-					'avatar': str(message.user.avatar),
-					'displayColor': message.user.display_color,
-					'text': message.text,
-					'timestamp': str(message.timestamp),
-					'typingDelayOverride': message.typing_delay_override_ms,
-					'typingSpeed': message.user.typing_speed
-				}
+				msg_dict = FrontendDataAdapter.adapt(message)
 
 				timeline_events.append(msg_dict)
 
@@ -173,9 +60,9 @@ class MainChatPage(View):
 		chats = Chat.objects.all()
 		context["chats"] = chats
 
-		chats_JSON = []
+		chats_json = []
 		for chat in Chat.objects.all():
-			chats_JSON.append({
+			chats_json.append({
 				'id': chat.id,
 				'name': chat.name,
 				'isGroup': ChatMember.objects.filter(chat=chat).count() > 1,
@@ -183,7 +70,7 @@ class MainChatPage(View):
 				'isChannel': chat.is_channel
 			})
 
-		context["chatsJSON"] = json.dumps(chats_JSON, cls=DjangoJSONEncoder)
+		context["chatsJSON"] = json.dumps(chats_json, cls=DjangoJSONEncoder)
 
 		context["player_session"] = player_session
 		context["session_code"] = session_code
@@ -193,13 +80,12 @@ class MainChatPage(View):
 
 class ChatEditorPage(View):
 	def get(self, request):
-		context = base_context(request, title='Edit', page_name='editor')
+		context = SessionManager.base_context(request, title='Edit', page_name='editor')
 
 		context['chat_structure'] = json.dumps(csp.ChatStructureAdapter.to_json(), cls=DjangoJSONEncoder)
 
-		messagesInNodes = get_messages_in_nodes()
-
-		context['messages_in_node'] = json.dumps(messagesInNodes, cls=DjangoJSONEncoder)
+		messages_in_nodes = FrontendDataAdapter.get_messages_by_each_node()
+		context['messages_in_node'] = json.dumps(messages_in_nodes, cls=DjangoJSONEncoder)
 
 		characters = [(character.username, character.full_name) for character in Character.objects.all()]
 		context['characters'] = characters
@@ -226,10 +112,10 @@ class ChatEditorPage(View):
 
 			node_properties[node.id] = props
 
-		chats_JSON = {}
+		chats_json = {}
 
 		for chat in Chat.objects.all():
-			chats_JSON[chat.id] = {
+			chats_json[chat.id] = {
 				'id': chat.id,
 				'name': chat.name,
 				'isGroup': ChatMember.objects.filter(chat=chat).count() > 1,
@@ -237,7 +123,7 @@ class ChatEditorPage(View):
 				'isChannel': chat.is_channel
 			}
 
-		context["chats_JSON"] = json.dumps(chats_JSON, cls=DjangoJSONEncoder)
+		context["chats_JSON"] = json.dumps(chats_json, cls=DjangoJSONEncoder)
 
 		context['node_properties'] = json.dumps(node_properties, cls=DjangoJSONEncoder)
 
@@ -253,7 +139,7 @@ class SignIn(View):
 
 	def get(self, request):
 
-		context = base_context(request, title='Вхід', header='Вхід', page_name='signin', error=0)
+		context = SessionManager.base_context(request, title='Вхід', header='Вхід', page_name='signin', error=0)
 		context['error'] = 0
 		return render(request, "signin.html", context)
 
@@ -272,7 +158,7 @@ class SignIn(View):
 				return HttpResponseRedirect("/")
 
 		else:
-			context = base_context(request, title='Вхід', header='Вхід')
+			context = SessionManager.base_context(request, title='Вхід', header='Вхід')
 			logout(request)
 			context['error'] = 1
 			return render(request, "signin.html", context)
@@ -287,7 +173,7 @@ class Logout(View):
 class SignUp(View):
 	def get(self, request):
 
-		context = base_context(
+		context = SessionManager.base_context(
 			request, title='Реєстрація', header='Реєстрація', page_name='signup', error=0)
 
 		return render(request, "signup.html", context)
@@ -317,7 +203,7 @@ class SignUp(View):
 			return HttpResponseRedirect("/")
 
 		else:
-			context = base_context(
+			context = SessionManager.base_context(
 				request, title='Реєстрація', header='Реєстрація')
 
 			for field_name in form.keys():
@@ -329,7 +215,7 @@ class SignUp(View):
 
 class StartGame(View):
 	def get(self, request):
-		context = base_context(
+		context = SessionManager.base_context(
 			request, title='Нова гра', header='Реєстрація')
 		return render(request, "start_game.html", context)
 
@@ -346,7 +232,7 @@ class AjaxEditorSaveChatStructure(View):
 		new_structure = csp.ChatStructureAdapter.to_json()
 
 		response["updatedStructure"] = new_structure
-		response["messagesInNodes"] = get_messages_in_nodes()
+		response["messagesInNodes"] = FrontendDataAdapter.get_messages_in_nodes()
 		response["result"] = "success"
 
 		return HttpResponse(
@@ -433,7 +319,7 @@ class AjaxUpdateNodeProperties(View):
 		node.user_choice_text = data['nodeUserChoiceText']
 		node.chat = Chat.objects.get(id=data['chatId'])
 		is_entry_point = data['isEntryPoint']
-		if is_entry_point == True:
+		if is_entry_point:
 			if not EntryNode.objects.filter(node=node).exists():
 				new_entry_node = EntryNode(node=node)
 				new_entry_node.save()
@@ -476,7 +362,7 @@ class AjaxEditorCreateNode(View):
 
 		node.save()
 
-		if data['isGameEntryNode'] == True:
+		if data['isGameEntryNode']:
 			new_entry_node = EntryNode(node=node)
 			new_entry_node.save()
 
@@ -495,6 +381,25 @@ class AjaxGetEditorNodeStructure(View):
 
 		response["result"] = "success"
 		response["nodeStructure"] = csp.ChatStructureAdapter.to_json()
+
+		return HttpResponse(
+			json.dumps(response),
+			content_type="application/json"
+		)
+  
+  
+class AjaxUserSelectsNode(View):
+	def post(self, request):
+		data = json.loads(request.body)
+		node_id = data['nodeId']
+		player_session = PlayerSession.objects.get(user_session_code=data['userSessionCode'])
+		player_selected_node = ChatOptionNode.objects.get(id=node_id)
+		PlayerSelectedNode.objects.create(player=player_session, node=player_selected_node)
+		player_selected_node.save()
+  
+  
+		response = {}
+		response["result"] = "success"
 
 		return HttpResponse(
 			json.dumps(response),

@@ -1,0 +1,7 @@
+[tool.pylint.'FORMAT']
+indent-string = "\t"
+disable = ["E1101", "W0231", "C0116", "C0115", "C0301", "E0401"]
+
+[*.py]
+indent_style = tab
+indent_size = 4

@@ -157,11 +157,13 @@ function toggleControlPanelVisibility(controlPanel) {
 
 function activateAddChoiceNodeMenu() {
 	clearNewChoiceNodeInspectorPanel();
+	document.getElementById("newCrossNodeInspectorPanel").style.display = "none";
 	document.getElementById("newChoiceNodeInspectorPanel").style.display = "flex";
 }
 
 function activateAddCrossChatNodeMenu() {
 	clearNewCrossChatEventNodeInspectorPanel();
+	document.getElementById("newChoiceNodeInspectorPanel").style.display = "none";
 	document.getElementById("newCrossNodeInspectorPanel").style.display = "flex";
 }
 
@@ -293,10 +295,10 @@ function loadMessagesToEditor(nodeId) {
 				<img class="message-avatar" src="/static/images/users/code.jpg" alt="avatar">
 				<div class="messages-block">
 					<div class="message user-2">
-						<div class="message-username">${message.full_name}</div>
+						<div class="message-username">${message.fullName}</div>
 						<div class="message-content-line" id="message-${message.id}">
 							<p class="message-text">${message.text}</p>
-							<label class="message-timestamp">${message.time_sent}</label>
+							<label class="message-timestamp">${message.timeSent}</label>
 							<a class="message-timestamp message-delete-btn" data-value="${message.id}">Del.</a>
 						</div>
 					</div>
@@ -386,13 +388,13 @@ async function sendNodeMessage() {
 		messagesInNodes[parseInt(nodeId)][parseInt(newMessageId)] = {
 			"id": newMessageId,
 			"text": messageText,
-			"time_was_written": timeWasWritten,
-			"time_sent": timeWasWritten + ":" + timeSWasWritten + ":" + timeMsWasWritten,
+			"timeWasWritten": timeWasWritten,
+			"timeSent": timeWasWritten + ":" + timeSWasWritten + ":" + timeMsWasWritten,
 			"timestamp": dateWasWritten + " " + timeWasWritten + ":" + timeSWasWritten + "." + timeMsWasWritten + "+00:00",
-			"was_read": false,
-			"attached_image": "",
+			"wasRead": false,
+			"attachedImage": "",
 			"username": senderCharacter,
-			"full_name": charactersInfo[senderCharacter]
+			"fullName": charactersInfo[senderCharacter]
 		};
 		console.log("success");
 		loadMessagesToEditor(nodeId);

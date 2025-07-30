@@ -16,6 +16,8 @@ class ChatOptionNode(models.Model):
 	user_choice_text = models.CharField(max_length=50, blank=True, default="")
 	description = models.CharField(max_length=250, blank=True, default="")
 	type = models.CharField(max_length=50, blank=True, default="choice")
+	user_choice_start_time = models.DateTimeField(null=True, blank=True, default=make_aware(datetime.datetime(2021, 12, 10)))
+	user_choice_lasts_for = models.IntegerField(default=10)
 
 	pos_x = models.IntegerField(default=0)
 	pos_y = models.IntegerField(default=0)
