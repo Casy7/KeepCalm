@@ -46,8 +46,8 @@ class CharacterAdmin(admin.ModelAdmin):
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'node', 'user', 'timestamp', 'was_read')
-    list_filter = ('was_read', 'timestamp', 'user')
+    list_display = ('id', 'node', 'user', 'delay_ms', 'was_read')
+    list_filter = ('was_read', 'delay_ms', 'user')
     search_fields = ('text',)
 
 

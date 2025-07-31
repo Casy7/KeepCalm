@@ -5,3 +5,5 @@ disable = ["E1101", "W0231", "C0116", "C0115", "C0301", "E0401"]
 [*.py]
 indent_style = tab
 indent_size = 4
+
+# D:\AI\Soft\Tabby\tabby.exe serve --model StarCoder-1B --chat-model Qwen2-1.5B-Instruct

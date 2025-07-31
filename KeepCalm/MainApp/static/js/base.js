@@ -80,11 +80,37 @@ export function warnUser(title, desc, color = "orange", timeout = 4000) {
 
 
 
-export function formatTime(timestamp) {
+export function timestampToStr(timestamp) {
 	const hours = timestamp.getHours().toString().padStart(2, '0');
 	const minutes = timestamp.getMinutes().toString().padStart(2, '0');
 	return `${hours}:${minutes}`;
 }
+
+
+export function timeFormat(timeMs) {
+	const hours = Math.floor(timeMs / (1000 * 60 * 60));
+	const minutes = Math.floor((timeMs % (1000 * 60 * 60)) / (1000 * 60));
+	const seconds = Math.floor((timeMs % (1000 * 60)) / 1000);
+	const milliseconds = timeMs % 1000;
+
+	return (
+		hours.toString().padStart(2, '0') + ':' +
+		minutes.toString().padStart(2, '0') + ':' +
+		seconds.toString().padStart(2, '0') + '.' +
+		milliseconds.toString().padStart(3, '0')
+	);
+}
+
+
+export function timeToMs(hours, minutes, seconds, milliseconds) {
+	return (
+		parseInt(hours) * 60 * 60 * 1000 +
+		parseInt(minutes) * 60 * 1000 +
+		parseInt(seconds) * 1000 +
+		parseInt(milliseconds)
+	);
+}
+
 
 
 export class Request {

@@ -1,12 +1,8 @@
 
-import { copyTextToClipboard, warnUser, Request, removeChildrens } from './base.js';
+import { copyTextToClipboard, timestampToStr, timeFormat, timeToMs, warnUser, Request, removeChildrens } from './base.js';
 import Split from '../modules/split.js/split.es.js';
 
 
-function sortByTimestamp(arr) {
-	arr.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-	return arr;
-}
 
 
 window.addEventListener("load", () => {
@@ -89,7 +85,6 @@ document.getElementById("addNewCrossNodeBtn").addEventListener("click", () => {
 	addCrossNode();
 });
 
-
 // document.getElementById("add-output").addEventListener("click", () => {
 
 // const selectedId = selectedNode;
@@ -131,8 +126,8 @@ document.getElementById("sendNewMessageBtn").addEventListener("click", () => {
 	sendNodeMessage();
 });
 
-document.getElementById("chatNodeId").addEventListener("click", () => {
-	deleteNodeMessage(this);
+document.getElementById("chatNodeId").addEventListener("click", (event) => {
+	deleteNodeMessage(event.target);
 });
 
 document.querySelectorAll(".control-panel-header").forEach(controlPanelHeader => controlPanelHeader.addEventListener("click", (event) => {
@@ -142,6 +137,13 @@ document.querySelectorAll(".control-panel-header").forEach(controlPanelHeader =>
 document.getElementById("saveNodePropertiesBtn").addEventListener("click", () => {
 	sendNodeProperties();
 })
+
+
+
+function sortBySendingDelay(arr) {
+	arr.sort((a, b) => parseInt(a.delayMs) - parseInt(b.delayMs));
+	return arr;
+}
 
 
 function toggleControlPanelVisibility(controlPanel) {
@@ -178,16 +180,29 @@ function loadNodePropertiesToInspectorPanel(id) {
 	document.getElementById("nodeDescription").value = node.description;
 	document.getElementById("isNodeAutomaticallyStarted").checked = node.isGameEntryNode;
 	document.getElementById("nodeChatSelector").value = node.chatId;
+
 	document.getElementById("inspectorCurrentChatName").innerText = "Chat: " + node.chatName;
 	document.getElementById("inspectorChatHeader").innerText = node.chatName;
+
+	document.getElementById("timeHChoiceStarts").value = Math.floor(node.choiceDelayMs / (1000 * 60 * 60));
+	document.getElementById("timeMChoiceStarts").value = Math.floor((node.choiceDelayMs % (1000 * 60 * 60)) / (1000 * 60));
+	document.getElementById("timeSChoiceStarts").value = Math.floor((node.choiceDelayMs % (1000 * 60)) / 1000);
+	document.getElementById("howLongChoiceLasts").value = Math.floor(node.choiceLastsForMs / 1000);
+
 }
 
 function clearNodePropertiesInInspectorPanel() {
 	document.getElementById("nodeUserChoiceText").value = "";
 	document.getElementById("nodeDescription").value = "";
 	document.getElementById("isNodeAutomaticallyStarted").checked = false;
+
 	document.getElementById("inspectorCurrentChatName").innerText = "  ";
 	document.getElementById("inspectorChatHeader").innerText = "No node selected";
+
+	document.getElementById("timeHChoiceStarts").value = 0;
+	document.getElementById("timeMChoiceStarts").value = 0;
+	document.getElementById("timeSChoiceStarts").value = 0;
+	document.getElementById("howLongChoiceLasts").value = 0;
 
 	clearMessagesContainer();
 }
@@ -209,16 +224,6 @@ function clearNewCrossChatEventNodeInspectorPanel() {
 
 
 function getEditorCenter() {
-	// let editorTransform = document.querySelector(".drawflow").style.transform;
-	// const match = editorTransform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
-
-	// if (match) {
-	// 	const x = parseFloat(match[1]);
-	// 	const y = parseFloat(match[2]);
-	// 	return [x, y];
-	// } else {
-	// 	return [0.0, 0.0];
-	// }
 
 	let x = -1 * document.querySelector(".drawflow").getBoundingClientRect().x + 500;
 	let y = -1 * document.querySelector(".drawflow").getBoundingClientRect().y + 500
@@ -285,10 +290,13 @@ function loadMessagesToEditor(nodeId) {
 	const container = document.getElementById("chatNodeId");
 
 	const messagesList = Object.values(messagesInNodes[parseInt(nodeId)]);
-	const messages = sortByTimestamp(messagesList);
+	const messages = sortBySendingDelay(messagesList);
 
 	for (let i = 0; i < messages.length; i++) {
 		const message = messages[i];
+
+
+		let messageTimeSent = timeFormat(message.delayMs);
 
 		const template = `
 			<div class="message-wrapper incoming">
@@ -298,7 +306,7 @@ function loadMessagesToEditor(nodeId) {
 						<div class="message-username">${message.fullName}</div>
 						<div class="message-content-line" id="message-${message.id}">
 							<p class="message-text">${message.text}</p>
-							<label class="message-timestamp">${message.timeSent}</label>
+							<label class="message-timestamp">${messageTimeSent}</label>
 							<a class="message-timestamp message-delete-btn" data-value="${message.id}">Del.</a>
 						</div>
 					</div>
@@ -360,22 +368,22 @@ async function refreshNodeEditor() {
 
 async function sendNodeMessage() {
 
-	let messageId = 0;
-	let nodeId = selectedNode.replace("node-", "");
-	let messageText = document.getElementById("messageText").value;
-	let senderCharacter = document.getElementById("senderCharacter").value;
-	let dateWasWritten = document.getElementById("dateWasWritten").value;
-	let timeWasWritten = document.getElementById("timeWasWritten").value;
-	let timeSWasWritten = document.getElementById("timeSWasWritten").value;
-	let timeMsWasWritten = document.getElementById("timeMsWasWritten").value;
+	const messageId = 0;
+	const nodeId = parseInt(selectedNode.replace("node-", ""));
+	const messageText = document.getElementById("messageText").value;
+	const senderCharacter = document.getElementById("senderCharacter").value;
+	const timeHWasWritten = document.getElementById("timeHWasWritten").value;
+	const timeMWasWritten = document.getElementById("timeMWasWritten").value;
+	const timeSWasWritten = document.getElementById("timeSWasWritten").value;
+	const timeMsWasWritten = document.getElementById("timeMsWasWritten").value;
+	const delayMs = timeToMs(timeHWasWritten, timeMWasWritten, timeSWasWritten, timeMsWasWritten);
 
 	let rqData = {
 		'messageId': messageId,
 		'nodeId': nodeId,
 		'messageText': messageText,
 		'senderCharacter': senderCharacter,
-		'dateWasWritten': dateWasWritten,
-		'timeWasWritten': timeWasWritten,
+		'delayMs': delayMs,
 		'timeSWasWritten': timeSWasWritten,
 		'timeMsWasWritten': timeMsWasWritten
 	}
@@ -384,25 +392,23 @@ async function sendNodeMessage() {
 	await rq.send();
 
 	if (rq.result === "success") {
-		let newMessageId = rq.messageId;
-		messagesInNodes[parseInt(nodeId)][parseInt(newMessageId)] = {
-			"id": newMessageId,
+		messagesInNodes[nodeId][rq.recievedData.messageId] = {
+			"id": rq.recievedData.messageId,
 			"text": messageText,
-			"timeWasWritten": timeWasWritten,
-			"timeSent": timeWasWritten + ":" + timeSWasWritten + ":" + timeMsWasWritten,
-			"timestamp": dateWasWritten + " " + timeWasWritten + ":" + timeSWasWritten + "." + timeMsWasWritten + "+00:00",
+			"delayMs": delayMs,
 			"wasRead": false,
 			"attachedImage": "",
 			"username": senderCharacter,
 			"fullName": charactersInfo[senderCharacter]
 		};
 		console.log("success");
+		// messagesInNodes[parseInt(nodeId)] = sortByTimestamp(messagesInNodes[parseInt(nodeId)]);
 		loadMessagesToEditor(nodeId);
 	} else {
 		console.warn("Не вдалось відправити повідомлення.");
 	}
-
 }
+
 
 async function deleteNodeMessage(target) {
 
@@ -416,29 +422,10 @@ async function deleteNodeMessage(target) {
 	await rq.send();
 
 	if (rq.result === "success") {
-
-		const deletedMessageId = rq.deletedMessageId;
-		const messagesBlock = target.closest('.message-wrapper');
-
-		target.parentNode.remove();
-		if (!messagesBlock) {
-			return;
-		}
-
-		const remaining = messagesBlock.querySelectorAll('.message-content-line');
-		if (remaining.length === 0) {
-			messagesBlock.remove();
-		}
-
-		nodeId = selectedNode.replace("node-", "");
-		delete messagesInNodes[parseInt(nodeId)][parseInt(deletedMessageId)];
-		console.log("success");
-		loadMessagesToEditor(nodeId);
-
+		delete messagesInNodes[rq.recievedData.nodeId][rq.recievedData.messageId];
+		loadMessagesToEditor(rq.recievedData.nodeId);
 	} else {
-
 		console.warn("Не вдалось видалити повідомлення.");
-
 	}
 
 }
@@ -451,26 +438,30 @@ async function sendNodeProperties() {
 	const nodeUserChoiceText = document.getElementById("nodeUserChoiceText").value;
 	const nodeChatId = document.getElementById("nodeChatSelector").value;
 	const isNodeAutomaticallyStarted = document.getElementById("isNodeAutomaticallyStarted").checked;
+	const nodeTimeHChoiceStarts = document.getElementById("timeHChoiceStarts").value;
+	const nodeTimeMChoiceStarts = document.getElementById("timeMChoiceStarts").value;
+	const nodeTimeSChoiceStarts = document.getElementById("timeSChoiceStarts").value;
+	const choiceLastsForMs = document.getElementById("howLongChoiceLasts").value * 1000;
+	const delayMs = timeToMs(nodeTimeHChoiceStarts, nodeTimeMChoiceStarts, nodeTimeSChoiceStarts, 0);
+
 
 	const rqData = {
 		'nodeId': nodeId,
 		'nodeDescription': nodeDescription,
 		'nodeUserChoiceText': nodeUserChoiceText,
 		'chatId': nodeChatId,
-		'isEntryPoint': isNodeAutomaticallyStarted
+		'isEntryPoint': isNodeAutomaticallyStarted,
+		'delayMs': delayMs,
+		'choiceLastsForMs': choiceLastsForMs
 	}
 
 	const rq = new Request({ url: "/update_node_properties/", data: rqData });
 	await rq.send();
 
 	if (rq.result === "success") {
-
 		warnUser("Saved!", "");
-
 	} else {
-
 		warnUser("Error!", "Cannot save properties.");
-
 	}
 }
 

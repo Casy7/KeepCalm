@@ -13,11 +13,11 @@ class Chat(models.Model):
 
 class ChatOptionNode(models.Model):
 	chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
-	user_choice_text = models.CharField(max_length=50, blank=True, default="")
+	choice_text = models.CharField(max_length=50, blank=True, default="")
 	description = models.CharField(max_length=250, blank=True, default="")
 	type = models.CharField(max_length=50, blank=True, default="choice")
-	user_choice_start_time = models.DateTimeField(null=True, blank=True, default=make_aware(datetime.datetime(2021, 12, 10)))
-	user_choice_lasts_for = models.IntegerField(default=10)
+	choice_delay_ms = models.BigIntegerField(default=0)
+	choice_lasts_for_ms = models.IntegerField(default=10000)
 
 	pos_x = models.IntegerField(default=0)
 	pos_y = models.IntegerField(default=0)
@@ -50,7 +50,7 @@ class Character(models.Model):
 class Message(models.Model):
 	node = models.ForeignKey(ChatOptionNode, on_delete=models.CASCADE)
 	user = models.ForeignKey(Character, on_delete=models.CASCADE)
-	timestamp = models.DateTimeField(default=make_aware(datetime.datetime(2021, 12, 10)))
+	delay_ms = models.BigIntegerField(default=0)
 	attached_image = models.ImageField(upload_to='chat_images/', null=True, blank=True)
 	was_read = models.BooleanField(default=False)
 	typing_delay_override_ms = models.IntegerField(default=-1)

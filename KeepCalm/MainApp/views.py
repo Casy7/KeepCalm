@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 from django.http import HttpResponse, HttpResponseRedirect
@@ -12,7 +12,11 @@ from django.views.generic import View
 from MainApp.models import User, Chat, ChatOptionNode, ChatMember, Character, Message, PlayerSession, PlayerSelectedNode, EntryNode
 from .utils import chat_structure_parser as csp
 from .utils.session_manager import SessionManager
+from .utils.db_helper import DBHelper as db
 from .utils.frontend_data_adapter import FrontendDataAdapter
+
+
+START_DATE = "2021-12-10T08:00:00+00:00"
 
 
 class StartGamePage(View):
@@ -84,7 +88,7 @@ class ChatEditorPage(View):
 
 		context['chat_structure'] = json.dumps(csp.ChatStructureAdapter.to_json(), cls=DjangoJSONEncoder)
 
-		messages_in_nodes = FrontendDataAdapter.get_messages_by_each_node()
+		messages_in_nodes = db.get_messages_for_each_node()
 		context['messages_in_node'] = json.dumps(messages_in_nodes, cls=DjangoJSONEncoder)
 
 		characters = [(character.username, character.full_name) for character in Character.objects.all()]
@@ -99,18 +103,7 @@ class ChatEditorPage(View):
 
 		node_properties = {}
 		for node in ChatOptionNode.objects.all():
-			props = {}
-			props["chatId"] = node.chat.id
-			props["nodeId"] = node.id
-			props["type"] = node.type
-			props["chatName"] = node.chat.name
-			props["description"] = node.description
-			props["isGameEntryNode"] = EntryNode.objects.filter(node=node).exists()
-
-			if node.type == "choice":
-				props["userChoiceText"] = node.user_choice_text
-
-			node_properties[node.id] = props
+			node_properties[node.id] = FrontendDataAdapter.adapt(node)
 
 		chats_json = {}
 
@@ -232,7 +225,7 @@ class AjaxEditorSaveChatStructure(View):
 		new_structure = csp.ChatStructureAdapter.to_json()
 
 		response["updatedStructure"] = new_structure
-		response["messagesInNodes"] = FrontendDataAdapter.get_messages_in_nodes()
+		response["messagesInNodes"] = db.get_messages_for_each_node()
 		response["result"] = "success"
 
 		return HttpResponse(
@@ -258,9 +251,8 @@ class AjaxEditorSaveMessage(View):
 		message.user = Character.objects.filter(username=form['senderCharacter'])[0]
 		message.text = form['messageText']
 
-		message_naive_dt = datetime.strptime(form['dateWasWritten']+"T"+form['timeWasWritten']+":"+form['timeSWasWritten']+"+00:00", "%Y-%m-%dT%H:%M:%S%z")
-		message_naive_dt = message_naive_dt.replace(microsecond=int(form['timeMsWasWritten'])*10000)
-		message.timestamp = message_naive_dt
+
+		message.delay_ms = form["delayMs"]
 
 		message.save()
 
@@ -281,7 +273,8 @@ class AjaxEditorDeleteMessage(View):
 		message = Message.objects.get(id=form['messageId'])
 
 		response = {}
-		response["deletedMessageId"] = message.id
+		response["messageId"] = message.id
+		response["nodeId"] = message.node.id
 		message.delete()
 
 		response["result"] = "success"
@@ -318,6 +311,11 @@ class AjaxUpdateNodeProperties(View):
 		node.description = data['nodeDescription']
 		node.user_choice_text = data['nodeUserChoiceText']
 		node.chat = Chat.objects.get(id=data['chatId'])
+
+		node.choice_delay_ms = data['delayMs']
+		node.choice_lasts_for_ms = data['choiceLastsForMs']
+  
+#   datetime.strptime(form['dateWasWritten']+"T"+form['timeWasWritten']+":"+form['timeSWasWritten']+"+00:00", "%Y-%m-%dT%H:%M:%S%z")
 		is_entry_point = data['isEntryPoint']
 		if is_entry_point:
 			if not EntryNode.objects.filter(node=node).exists():

@@ -75,6 +75,19 @@
 				<textarea class="form-control dark-control" id="nodeUserChoiceText" data-bs-toggle="tooltip" data-bs-title="Оце юзер бачить у селекторі варіантів"></textarea>
 				<label for="nodeUserChoiceText">System description</label>
 				<textarea class="form-control dark-control" id="nodeDescription" data-bs-toggle="tooltip" data-bs-title="Це — опис конкретно для нас, девів. Він відображається у самому редакторі ліворуч"></textarea>
+				
+				<label for="timeChoiceStarts">When choice node starts</label>
+				<div class="flex-panel">
+					<input type="number" value="0" min="0" max="59" id="timeHChoiceStarts">
+					<input type="number" value="0" min="0" max="59" id="timeMChoiceStarts">
+					<input type="number" value="0" min="0" max="59" id="timeSChoiceStarts">
+				</div>
+
+				<label for="howLongChoiceLasts">How long does choice last</label>
+				<div class="flex-panel">
+					<input type="number" value="0" min="0" max="9000" id="howLongChoiceLasts">
+				</div>
+
 				<button class="system-button save-btn stretch" id="saveNodePropertiesBtn">Save</button>
 				<button class="system-button save-btn stretch" id="addNodeBtn" style="display: none;">Add Node</button>
 
@@ -115,10 +128,10 @@
 							</select>
 						</div>
 						<div class="flex-panel">
-							<input type="date" value="2021-12-10" id="dateWasWritten">
-							<input type="time" value="08:00" id="timeWasWritten">
-							<input type="number" value="0" min="0" max="59" id="timeSWasWritten">
-							<input type="number" value="0" min="0" max="99" id="timeMsWasWritten">
+							<input type="number" value="0" min="0" max="200" id="timeHWasWritten">h
+							<input type="number" value="0" min="0" max="59" id="timeMWasWritten">m
+							<input type="number" value="0" min="0" max="59" id="timeSWasWritten">s
+							<input type="number" value="0" min="0" max="99" id="timeMsWasWritten">ms
 						</div>
 						<div class="flex-panel">
 							<input type="text" id="messageText" placeholder="Message...">
