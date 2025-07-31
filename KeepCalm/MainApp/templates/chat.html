@@ -141,9 +141,12 @@
 </div>
 {% endblock %} {% block js_data %}
 <script>
+  const startGameDatetime = `{{ startGameDatetime }}`;
+
   let timelineEventsJSON = JSON.parse(`{{ timelineEvents|safe }}`);
   let users = JSON.parse(`{{ characters|safe }}`);
   let chats = JSON.parse(`{{ chatsJSON|safe }}`);
+  const nodes = JSON.parse(`{{ nodes|safe }}`);
 
   let timelineEvents = null;
   let timelineEventManager = null;

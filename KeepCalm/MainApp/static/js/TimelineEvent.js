@@ -3,7 +3,7 @@ export default class TimelineEvent {
 	constructor(data) {
 		Object.assign(this, data);
 		this.lava = "lavaBucket";
-		this.timestamp = new Date(data.timestamp);
+		this.timestamp = this.getTypingStartTime();
 	}
 
 	getTypingDelay() {
@@ -17,6 +17,10 @@ export default class TimelineEvent {
 	}
 
 	getTypingStartTime() {
-		return this.timestamp - this.getTypingDelay();
+
+		const nodeStartedAt = nodes[this.nodeId]['nodeStartedAt'];
+		let result = new Date(nodeStartedAt);
+		result.setTime(parseInt(result.getTime()) + parseInt(this.delayMs));
+		return result;
 	}
 }

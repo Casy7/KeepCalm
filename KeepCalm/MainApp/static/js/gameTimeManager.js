@@ -10,7 +10,8 @@ export default class GameTimeManager extends Observable {
 		GameTimeManager._instance = this;
 
 		this.tickRate = 1000;
-		this.inGameTime = new Date("2021-12-10T10:00:00");
+		this.startGameDatetime = startGameDatetime;
+		this.inGameTime = new Date(startGameDatetime);
 		this._intervalId = null;
 	}
 

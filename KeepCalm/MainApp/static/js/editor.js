@@ -296,7 +296,7 @@ function loadMessagesToEditor(nodeId) {
 		const message = messages[i];
 
 
-		let messageTimeSent = timeFormat(message.delayMs);
+		let messageTimeSent = timeFormat(message.delayMs, true);
 
 		const template = `
 			<div class="message-wrapper incoming">

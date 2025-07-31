@@ -8,9 +8,14 @@ import TypingIndicatorManager from './TypingIndicatorManager.js';
 
 
 
-import { copyTextToClipboard, warnUser, Request, removeChildrens, formatTime } from './base.js';
+import { copyTextToClipboard, warnUser, Request, removeChildrens, timeFormat } from './base.js';
 
 document.addEventListener("DOMContentLoaded", () => {
+
+
+	Object.keys(nodes).forEach(nodeId => {
+		nodes[nodeId]['nodeStartedAt'] = new Date(startGameDatetime);
+	});
 
 	timelineEvents = convertTimelineEvents(timelineEventsJSON);
 
@@ -22,6 +27,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	gameTimeManager.addObserver(debugTimeController);
 	gameTimeManager.addObserver(timelineEventManager);
+
+
+
+
+
 
 	for (let i = 0; i < timelineEventManager.pastTimelineEvents.length; i++) {
 		eventRenderer.buildTemplate(timelineEventManager.pastTimelineEvents[i]);

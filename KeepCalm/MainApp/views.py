@@ -31,6 +31,7 @@ class MainChatPage(View):
 	def get(self, request, session_code):
 		context = SessionManager.base_context(request, title='KeepCalm', page_name='game_page')
 
+		# Session key
 		player_session = None
 		if not PlayerSession.objects.filter(user_session_code=session_code).exists():
 			player_session = PlayerSession.objects.create(user_session_code=session_code)
@@ -41,15 +42,19 @@ class MainChatPage(View):
 			player_session = PlayerSession.objects.get(user_session_code=session_code)
 
 		player_selected_nodes = PlayerSelectedNode.objects.filter(player=player_session)
+		
+		context["player_session"] = player_session
+		context["session_code"] = session_code
 
+		# Characters
 		characters = []
-
 		for character in Character.objects.all():
 			characters.append(FrontendDataAdapter.adapt(character))
+
 		context["characters"] = json.dumps(characters, cls=DjangoJSONEncoder)
 
+		# Events
 		timeline_events = []
-
 		for node in player_selected_nodes:
 
 			node_messages = Message.objects.filter(node=node.node)
@@ -61,6 +66,7 @@ class MainChatPage(View):
 
 		context["timelineEvents"] = json.dumps(timeline_events, cls=DjangoJSONEncoder)
 
+		# Chats info
 		chats = Chat.objects.all()
 		context["chats"] = chats
 
@@ -75,9 +81,15 @@ class MainChatPage(View):
 			})
 
 		context["chatsJSON"] = json.dumps(chats_json, cls=DjangoJSONEncoder)
+		context["startGameDatetime"] = START_DATE
 
-		context["player_session"] = player_session
-		context["session_code"] = session_code
+		# Nodes info
+		node_properties = {}
+		for node in ChatOptionNode.objects.all():
+			node_properties[node.id] = FrontendDataAdapter.adapt(node)
+
+		context['nodes'] = json.dumps(node_properties, cls=DjangoJSONEncoder)
+
 
 		return render(request, "chat.html", context)
 

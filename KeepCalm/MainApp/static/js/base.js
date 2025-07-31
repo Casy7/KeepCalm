@@ -87,18 +87,18 @@ export function timestampToStr(timestamp) {
 }
 
 
-export function timeFormat(timeMs) {
+export function timeFormat(timeMs, precise = false) {
 	const hours = Math.floor(timeMs / (1000 * 60 * 60));
 	const minutes = Math.floor((timeMs % (1000 * 60 * 60)) / (1000 * 60));
 	const seconds = Math.floor((timeMs % (1000 * 60)) / 1000);
 	const milliseconds = timeMs % 1000;
 
-	return (
-		hours.toString().padStart(2, '0') + ':' +
-		minutes.toString().padStart(2, '0') + ':' +
-		seconds.toString().padStart(2, '0') + '.' +
-		milliseconds.toString().padStart(3, '0')
-	);
+	let resultTime = hours.toString().padStart(2, '0') + ':' +	minutes.toString().padStart(2, '0');
+
+	if (precise) {
+		resultTime +=  ':' + seconds.toString().padStart(2, '0') + '.' + milliseconds.toString().padStart(3, '0')
+	}
+	return resultTime;
 }
 
 

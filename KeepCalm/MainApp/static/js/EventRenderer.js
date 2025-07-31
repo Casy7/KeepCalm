@@ -1,4 +1,4 @@
-import { formatTime } from './base.js';
+import { timeFormat } from './base.js';
 
 export default class EventRenderer {
 	constructor() {
@@ -32,6 +32,8 @@ export default class EventRenderer {
 			const lastMessage = this.chatMessageWindow.lastElementChild;
 			let lastMessageUserId = null;
 
+			const today = new Date(message.timestamp.getFullYear(), message.timestamp.getMonth(), message.timestamp.getDate());
+
 			if (lastMessage != null) {
 
 				lastMessageUserId = lastMessage.dataset.userId;
@@ -44,7 +46,7 @@ export default class EventRenderer {
 					<div class="message" style="background-color: ${message.displayColor};">
 						<div class="message-content-line" id="message-${message.id}"> 
 							<p class="message-text">${message.text}</p> 
-							<label class="message-timestamp">${formatTime(message.timestamp)}</label> 
+							<label class="message-timestamp">${timeFormat(message.timestamp-today)}</label> 
 						</div> 
 					</div> `);
 			}
@@ -57,7 +59,7 @@ export default class EventRenderer {
 							<div class="message-username">${message.fullName}</div> 
 							<div class="message-content-line" id="message-${message.id}"> 
 								<p class="message-text">${message.text}</p> 
-								<label class="message-timestamp">${formatTime(message.timestamp)}</label> 
+								<label class="message-timestamp">${timeFormat(message.timestamp-today)}</label> 
 							</div> 
 						</div> 
 					</div>
@@ -73,8 +75,10 @@ export default class EventRenderer {
 
 	updateLastMessageInChatsList(message) {
 		const chatId = message.chatId;
+		const today = new Date(message.timestamp.getFullYear(), message.timestamp.getMonth(), message.timestamp.getDate());
+
 		document.getElementById(`chat${chatId}LastMessage`).innerText = message.fullName + ": " + message.text;
-		document.getElementById(`chat${chatId}LastMessageTimestamp`).innerText = formatTime(message.timestamp);
+		document.getElementById(`chat${chatId}LastMessageTimestamp`).innerText = timeFormat(message.timestamp-today);
 
 		if (activeChatId != chatId) {
 			const unreadMessagesCounter = document.getElementById(`chat${chatId}UnreadMessagesCounter`);
