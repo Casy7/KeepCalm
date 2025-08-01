@@ -77,6 +77,7 @@ class PlayerSession(models.Model):
 class PlayerSelectedNode(models.Model):
 	player = models.ForeignKey(PlayerSession, on_delete=models.CASCADE)
 	node = models.ForeignKey(ChatOptionNode, on_delete=models.CASCADE)
+	time_selected = models.DateTimeField(default=make_aware(datetime.datetime.now()))
 
 	class Meta:
 		constraints = [

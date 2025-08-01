@@ -15,6 +15,7 @@ from .views import (
 	AjaxUpdateNodeProperties,
 	AjaxGetEditorNodeStructure,
 	AjaxEditorCreateNode,
+	AjaxUserSelectsOption,
 	SignIn,
 	SignUp,
 	Logout,
@@ -33,6 +34,7 @@ urlpatterns = [
 	path("send_node_message/", AjaxEditorSaveMessage.as_view(), name="send_node_message"),
 	path("delete_node_message/", AjaxEditorDeleteMessage.as_view(), name="delete_node_message"),
 	path("get_editor_node_structure/", AjaxGetEditorNodeStructure.as_view(), name="get_node_structure"),
+	path("select_option/", AjaxUserSelectsOption.as_view(), name="select_option"),
 
 	path("signin/", SignIn.as_view(), name="login"),
     path("signout/", Logout.as_view(), name="logout"),

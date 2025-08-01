@@ -29,10 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	gameTimeManager.addObserver(timelineEventManager);
 
 
-
-
-
-
 	for (let i = 0; i < timelineEventManager.pastTimelineEvents.length; i++) {
 		eventRenderer.buildTemplate(timelineEventManager.pastTimelineEvents[i]);
 	}
@@ -53,6 +49,10 @@ document.querySelectorAll('.chat-menu-line').forEach(div => {
 		unreadMessagesCounter.style.display = "none";
 	});
 
+});
+
+document.getElementById("selectOption1").addEventListener("click", () => {
+	selectOption(5);
 });
 
 
@@ -85,11 +85,12 @@ function openChat(chatId) {
 }
 
 
-function convertTimelineEvents(events) {
+export function convertTimelineEvents(events) {
 	let result = [];
 	for (let i = 0; i < events.length; i++) {
 		result.push(new TimelineEvent(events[i]));
 	}
 	return result;
 }
+
 

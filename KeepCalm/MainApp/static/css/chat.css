@@ -119,6 +119,7 @@
   display: flex;
   flex-grow: 0;
 }
+
 .outgoing .message-content-line.option {
   width: max-content;
   flex-direction: row-reverse;
@@ -188,13 +189,11 @@
 }
 
 .input-container button img {
-  filter: invert(39%) sepia(80%) saturate(61%) hue-rotate(10deg) brightness(90%)
-    contrast(90%);
+  filter: invert(39%) sepia(80%) saturate(61%) hue-rotate(10deg) brightness(90%) contrast(90%);
 }
 
 .system-button.wheat {
-  filter: invert(39%) sepia(80%) saturate(61%) hue-rotate(10deg) brightness(90%)
-    contrast(90%);
+  filter: invert(39%) sepia(80%) saturate(61%) hue-rotate(10deg) brightness(90%) contrast(90%);
 }
 
 .system-icon {
@@ -233,4 +232,8 @@
 .chat-status {
   color: wheat;
   margin-top: -2px;
+}
+
+#choiceOptionsWrapper {
+  width: 100%;
 }

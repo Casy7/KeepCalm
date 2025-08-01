@@ -1,5 +1,5 @@
 
-from MainApp.models import EntryNode, Message, ChatOptionNode, Character
+from MainApp.models import ChatMember, EntryNode, Message, ChatOptionNode, Character
 
 
 class FrontendDataAdapter:
@@ -41,10 +41,28 @@ class FrontendDataAdapter:
                 'typingSpeed': message.user.typing_speed
             }
 
-        elif isinstance(obj, ChatOptionNode):
 
-            node = obj
-            adapted_obj = {
+                
+
+        return adapted_obj
+    
+    @staticmethod
+    def adapt_chat(chat):
+        adapted_chat = {
+				'id': chat.id,
+				'name': chat.name,
+				'isGroup': ChatMember.objects.filter(chat=chat).count() > 1,
+				'avatar': str(chat.avatar),
+				'isChannel': chat.is_channel
+			}
+
+        return adapted_chat
+
+
+
+    @staticmethod
+    def adapt_node(node, node_selected_time=None):
+        adapted_node = {
                 'id': node.id,
                 'chatId': node.chat.id,
                 'type': node.type,
@@ -52,11 +70,11 @@ class FrontendDataAdapter:
                 'description': node.description,
                 'isGameEntryNode': EntryNode.objects.filter(node=node).exists(),
                 'choiceDelayMs': node.choice_delay_ms,
-				'choiceLastsForMs': node.choice_lasts_for_ms                
+				'choiceLastsForMs': node.choice_lasts_for_ms,
+                'nodeSelectedTime': node_selected_time
             }
 
-            if node.type == "choice":
-                adapted_obj["userChoiceText"] = node.choice_text
-                
+        if node.type == "choice":
+            adapted_node["userChoiceText"] = node.choice_text
 
-        return adapted_obj
+        return adapted_node

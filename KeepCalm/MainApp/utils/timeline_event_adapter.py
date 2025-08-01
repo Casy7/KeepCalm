@@ -1,0 +1,43 @@
+from MainApp.utils.frontend_data_adapter import FrontendDataAdapter
+from MainApp.models import Message, ChatOptionNode, ChatNodeLink, PlayerSelectedNode
+
+class TimelineEventAdapter:
+	@staticmethod
+	def adapt_message_event(message, node_selected_time=None):
+
+		message_adapted = FrontendDataAdapter.adapt(message)
+		# message_adapted["typingDelayOverride"] = 10
+
+		return message_adapted
+
+		
+
+	@staticmethod
+	def adapt_choice_event(parent_node, user_session = None):
+
+		option_choices = [option.child for option in ChatNodeLink.objects.filter(parent=parent_node).all() if option.child.type == 'choice']
+
+		choice_event_data = {}
+		choice_event_data['options'] = []
+
+		choice_event_data['chatId'] = parent_node.chat.id
+		choice_event_data['nodeId'] = parent_node.id
+		choice_event_data['alreadySelected'] = False
+
+		for option in option_choices:
+			if user_session is not None and PlayerSelectedNode.objects.filter(player=user_session, node=option).exists():
+				choice_event_data['alreadySelected'] = True
+			option_data = {}
+			option_data['id'] = option.id
+			option_data['text'] = option.choice_text
+
+			choice_event_data['options'].append(option_data)
+
+
+		choice_event_data['type'] = 'choice'
+		choice_event_data['delayMs'] = parent_node.choice_delay_ms
+
+
+
+
+		return choice_event_data

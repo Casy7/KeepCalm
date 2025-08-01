@@ -3,6 +3,10 @@
 
 
 export function getCSRFToken() {
+	if (!exists('input[name="csrfmiddlewaretoken"]')){
+		warnUser("Error", "CSRF token not found.");
+		return "";
+	};
 	return document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 }
 

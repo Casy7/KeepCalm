@@ -18,6 +18,10 @@ from .utils.frontend_data_adapter import FrontendDataAdapter
 
 START_DATE = "2021-12-10T08:00:00+00:00"
 
+def extend_unique(lst, new_items):
+    for item in new_items:
+        if item not in lst:
+            lst.append(item)
 
 class StartGamePage(View):
 	def get(self, request):
@@ -41,10 +45,11 @@ class MainChatPage(View):
 		else:
 			player_session = PlayerSession.objects.get(user_session_code=session_code)
 
-		player_selected_nodes = PlayerSelectedNode.objects.filter(player=player_session)
+		player_selected_nodes = [selected_node.node for selected_node in PlayerSelectedNode.objects.filter(player=player_session)]
+		extend_unique(player_selected_nodes, db.update_selected_nodes(player_session))
 		
 		context["player_session"] = player_session
-		context["session_code"] = session_code
+		context["sessionCode"] = session_code
 
 		# Characters
 		characters = []
@@ -57,12 +62,7 @@ class MainChatPage(View):
 		timeline_events = []
 		for node in player_selected_nodes:
 
-			node_messages = Message.objects.filter(node=node.node)
-
-			for message in node_messages:
-				msg_dict = FrontendDataAdapter.adapt(message)
-
-				timeline_events.append(msg_dict)
+			timeline_events += db.get_timeline_events(node, player_session)
 
 		context["timelineEvents"] = json.dumps(timeline_events, cls=DjangoJSONEncoder)
 
@@ -72,13 +72,7 @@ class MainChatPage(View):
 
 		chats_json = []
 		for chat in Chat.objects.all():
-			chats_json.append({
-				'id': chat.id,
-				'name': chat.name,
-				'isGroup': ChatMember.objects.filter(chat=chat).count() > 1,
-				'avatar': str(chat.avatar),
-				'isChannel': chat.is_channel
-			})
+			chats_json.append(FrontendDataAdapter.adapt_chat(chat))
 
 		context["chatsJSON"] = json.dumps(chats_json, cls=DjangoJSONEncoder)
 		context["startGameDatetime"] = START_DATE
@@ -86,7 +80,7 @@ class MainChatPage(View):
 		# Nodes info
 		node_properties = {}
 		for node in ChatOptionNode.objects.all():
-			node_properties[node.id] = FrontendDataAdapter.adapt(node)
+			node_properties[node.id] = FrontendDataAdapter.adapt_node(node)
 
 		context['nodes'] = json.dumps(node_properties, cls=DjangoJSONEncoder)
 
@@ -115,7 +109,7 @@ class ChatEditorPage(View):
 
 		node_properties = {}
 		for node in ChatOptionNode.objects.all():
-			node_properties[node.id] = FrontendDataAdapter.adapt(node)
+			node_properties[node.id] = FrontendDataAdapter.adapt_node(node)
 
 		chats_json = {}
 
@@ -321,7 +315,7 @@ class AjaxUpdateNodeProperties(View):
 		node_id = data['nodeId']
 		node = ChatOptionNode.objects.get(id=node_id)
 		node.description = data['nodeDescription']
-		node.user_choice_text = data['nodeUserChoiceText']
+		node.choice_text = data['nodeUserChoiceText']
 		node.chat = Chat.objects.get(id=data['chatId'])
 
 		node.choice_delay_ms = data['delayMs']
@@ -365,7 +359,7 @@ class AjaxEditorCreateNode(View):
 			chat=Chat.objects.get(id=data['chatId']),
 			type=data['nodeType'],
 			description=data['nodeDescription'],
-			user_choice_text=data['nodeUserChoiceText'] if 'nodeUserChoiceText' in data else "",
+			choice_text=data['nodeUserChoiceText'] if 'nodeUserChoiceText' in data else "",
 			pos_x=data['posX'],
 			pos_y=data['posY']
 		)
@@ -409,6 +403,32 @@ class AjaxUserSelectsNode(View):
   
   
 		response = {}
+		response["result"] = "success"
+
+		return HttpResponse(
+			json.dumps(response),
+			content_type="application/json"
+		)
+
+
+class AjaxUserSelectsOption(View):
+	def post(self, request):
+		data = json.loads(request.body)
+		node_id = data['nodeId']
+		node_selected_time = data['nodeSelectedTime']
+
+		player_session = PlayerSession.objects.get(user_session_code=data['userSessionCode'])
+		player_selected_node = ChatOptionNode.objects.get(id=node_id)
+  		
+		response = {}
+		automatically_added_nodes = db.update_selected_nodes(player_session, player_selected_node)
+		response["newTimelineEvents"] = []
+		
+		for node in automatically_added_nodes: 
+			response["newTimelineEvents"] += db.get_timeline_events(node, player_session)
+
+		response['addedNodes'] = [FrontendDataAdapter.adapt_node(adapted_node, node_selected_time) for adapted_node in automatically_added_nodes]
+		
 		response["result"] = "success"
 
 		return HttpResponse(

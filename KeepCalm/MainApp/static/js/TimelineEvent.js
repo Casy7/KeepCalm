@@ -1,14 +1,17 @@
 
 export default class TimelineEvent {
 	constructor(data) {
+		
 		Object.assign(this, data);
 		this.lava = "lavaBucket";
 		this.timestamp = this.getTypingStartTime();
+		this.delayMs = parseInt(this.delayMs);
 	}
 
 	getTypingDelay() {
+
 		if (this.type !== "message") {
-			return 0;
+			return 10;
 		}
 		if (this.typingDelayOverride !== -1){
 			return this.typingDelayOverride;

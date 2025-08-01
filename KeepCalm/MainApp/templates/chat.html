@@ -1,11 +1,20 @@
-{% extends 'base.html' %} {% load static %} {% block page_styles %}
+{% extends 'base.html' %} {% load static %} 
+
+
+{% block csrf_token %}
+{% csrf_token %}
+{% endblock %}
+
+{% block page_styles %}
 <link rel="stylesheet" href="{% static 'css/chat.css' %}" type="text/css" />
 <link
   rel="stylesheet"
   href="{% static 'css/chat-selector.css' %}"
   type="text/css"
 />
-{% endblock %} {% block content %}
+{% endblock %} 
+
+{% block content %}
 <div class="game-container">
   <div class="chat-container">
     <div class="nav-container">
@@ -86,7 +95,7 @@
 		</div>
 
     <div class="input-container">
-      <div class="options-wrapper">
+      <div class="options-wrapper" id="choiceOptionsWrapper">
         <div class="message-wrapper outgoing">
           <div class="message option">
             <div class="message-content-line option">
@@ -98,34 +107,21 @@
           <div class="message option">
             <div class="message-content-line option">
               <p class="message-text option">
-                алкоголизм до добра не доводит, друг мой. Он сначала обещает
-                тепло, а потом потихоньку высушивает изнутри — печень, мозги и
-                всё, что делает тебя собой
+                алкоголизм до добра не доводит
               </p>
             </div>
           </div>
         </div>
-        <div class="message-wrapper outgoing">
+        <div class="message-wrapper outgoing" id="selectOption1" data-value="1">
           <div class="message option">
             <div class="message-content-line option">
               <p class="message-text option">
-                Адо́льф Ги́тлер (нем. Adolf Hitler, немецкий: [ˈaːdɔlf ˈhɪtlɐ]
-                (слушать)о файле; 20 апреля 1889, Браунау-ам-Инн, Цислейтания,
-                Австро-Венгрия — 30 апреля 1945, фюрербункер, Берлин, Германия)
-                — немецкий государственный и политический деятель, один из
-                основоположников национал-социализма, диктатор Германии с 1933
-                года до своего самоубийства в 1945 году. Рейхсканцлер
-                (1933—1945) и фюрер Германии (1934—1945), лидер НСДАП
-                (1921—1945).
+                Іди нахуй!
               </p>
             </div>
           </div>
         </div>
       </div>
-      <input type="text" disabled="disabled" placeholder="Message..." />
-      <button class="system-button">
-        <img class="system-icon" src="{% static 'icons/send.svg' %}" />
-      </button>
     </div>
   </div>
 </div>
@@ -142,11 +138,12 @@
 {% endblock %} {% block js_data %}
 <script>
   const startGameDatetime = `{{ startGameDatetime }}`;
+  const sessionCode = `{{ sessionCode }}`;
 
   let timelineEventsJSON = JSON.parse(`{{ timelineEvents|safe }}`);
   let users = JSON.parse(`{{ characters|safe }}`);
   let chats = JSON.parse(`{{ chatsJSON|safe }}`);
-  const nodes = JSON.parse(`{{ nodes|safe }}`);
+  let nodes = JSON.parse(`{{ nodes|safe }}`);
 
   let timelineEvents = null;
   let timelineEventManager = null;

@@ -1,6 +1,8 @@
+// import TimelineEventManager from "./TimelineEventManager";
+
 export default class TypingIndicatorManager {
 	constructor(eventRenderer, chats) {
-		this.typingUsersForEachChat = {} // userId => timeoutId
+		this.typingTimers = new Map(); // messageId => timeoutId
 		this.chatStatusElement = document.getElementById("chatStatus");
 		this.eventRenderer = eventRenderer;
 		this.chats = chats;
@@ -10,60 +12,64 @@ export default class TypingIndicatorManager {
 		const userId = message.userId;
 		const chatId = message.chatId;
 
-		if (this.typingUsersForEachChat[chatId] === undefined) {
-			this.typingUsersForEachChat[chatId] = new Map();
-		}
-
-		const chatUsersTyping = this.typingUsersForEachChat[chatId];
-
-		// Если уже "пишет" — отменяем старый таймер
-		if (chatUsersTyping.has(userId)) {
-			clearTimeout(chatUsersTyping.get(userId));
-		}
-
-		// Ставим новый
+		const timeout = message.getTypingDelay();
 		const timeoutId = setTimeout(() => {
-			chatUsersTyping.delete(userId);
-			this.updateChatStatus(chatId);
-
-			// Отрисовать сообщение после "печатает"
+			console.log(message.text);
 			this.eventRenderer.buildMessage(message);
-		}, message.getTypingDelay());
+			this.typingTimers.delete(message.id);
 
-		chatUsersTyping.set(userId, timeoutId);
+			this.updateChatStatus(chatId, true);
+		}, timeout);
+
+		this.typingTimers.set(message.id, timeoutId);
+
 		this.updateChatStatus(chatId);
 	}
 
-	updateChatStatus(chatId) {
 
-		if (this.typingUsersForEachChat[chatId] === undefined) {
-			this.typingUsersForEachChat[chatId] = new Map();
+	updateChatStatus(chatId, clearStatus = false) {
+
+		if (clearStatus) {
+			this.renderStatus(chatId, "");
+			return;
 		}
 
-		const chatUsersTyping = this.typingUsersForEachChat[chatId];
+		const activeUserIds = new Set();
 
-		const usersTyping = [...chatUsersTyping.keys()].map(id => this.getUserName(id));
+		// Пробегаем по ВСЕМ активным таймерам
+		for (const [messageId, timeoutId] of this.typingTimers.entries()) {
+			const message = timelineEventManager.futureTimelineEvents.find(t => t.id == messageId);
+			if (message && message.chatId === chatId) {
+				activeUserIds.add(message.userId);
+			}
+		}
+
+		const usersTyping = [...activeUserIds].map(id => this.getUserName(id));
 
 		if (usersTyping.length === 0) {
-			this.renderStatus(chatId, "");
-		}
-		else if (usersTyping.length === 1) {
+			if (timelineEventManager.getPastTimelineEventsByChatId(chatId)[length - 1]) {
+				this.renderStatus(chatId, lastMessage.fullName + ": " + lastMessage.text);
+			}
+			else {
+				this.renderStatus(" ");
+			}
+		} else if (usersTyping.length === 1) {
 			this.renderStatus(chatId, `${usersTyping[0]} друкує...`);
-		}
-		else if (usersTyping.length === 2) {
+		} else if (usersTyping.length === 2) {
 			this.renderStatus(chatId, `${usersTyping[0]}, ${usersTyping[1]} друкують...`);
-		}
-		else {
+		} else {
 			this.renderStatus(chatId, `${usersTyping.length} користувачі друкують...`);
 		}
+		// this.eventRenderer.updateLastMessageInChatsList(message);
 	}
+
 
 	renderStatus(chatId, status = "") {
 		if (activeChatId == chatId) {
 			this.chatStatusElement.innerText = status;
 		}
 		else {
-			document.getElementById(`chat${chatId}LastMessage`).innerText = status;
+			// document.getElementById(`chat${chatId}LastMessage`).innerText = status;
 		}
 	}
 

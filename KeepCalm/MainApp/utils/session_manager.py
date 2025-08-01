@@ -50,7 +50,7 @@ class SessionManager:
 		if SessionManager.is_user_authenticated(request):
 
 			context['username'] = user.username
-			context['full_name'] = FrontendDataAdapter.full_name(user)
+			context['full_name'] = SessionManager.full_name(user)
 			context['user'] = user
 
 			if request.user.is_superuser:
