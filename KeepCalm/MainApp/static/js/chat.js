@@ -51,10 +51,6 @@ document.querySelectorAll('.chat-menu-line').forEach(div => {
 
 });
 
-document.getElementById("selectOption1").addEventListener("click", () => {
-	selectOption(5);
-});
-
 
 function openChat(chatId) {
 	chatId = parseInt(chatId);
