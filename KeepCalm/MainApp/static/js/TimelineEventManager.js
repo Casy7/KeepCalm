@@ -25,6 +25,7 @@ export default class TimelineEventManager extends TimeObserver {
 	}
 
 	refreshPastAndFutureLists() {
+		this.sortFutureBySendingDelay();
 		let i = 0;
 		while (i < this.futureTimelineEvents.length && this.futureTimelineEvents[i].timestamp < gameTimeManager.now()) {
 			this.sendTimelineEvent(this.futureTimelineEvents[i]);
@@ -33,6 +34,11 @@ export default class TimelineEventManager extends TimeObserver {
 		}
 		this.futureTimelineEvents = this.futureTimelineEvents.slice(i);
 	}
+
+	sortFutureBySendingDelay() {
+		this.futureTimelineEvents = this.futureTimelineEvents.sort((a, b) => parseInt(a.delayMs) - parseInt(b.delayMs));
+	}
+
 
 	splitTimelineEventsByTime() {
 

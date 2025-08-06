@@ -320,6 +320,7 @@ class AjaxUpdateNodeProperties(View):
 
 		node.choice_delay_ms = data['delayMs']
 		node.choice_lasts_for_ms = data['choiceLastsForMs']
+		node.default_selected_node = data['defaultSelectedNode']
   
 #   datetime.strptime(form['dateWasWritten']+"T"+form['timeWasWritten']+":"+form['timeSWasWritten']+"+00:00", "%Y-%m-%dT%H:%M:%S%z")
 		is_entry_point = data['isEntryPoint']

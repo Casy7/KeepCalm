@@ -5,7 +5,7 @@ import DebugTimeController from './DebugTimeController.js';
 import EventRenderer from './EventRenderer.js';
 import TimelineEvent from './TimelineEvent.js';
 import TypingIndicatorManager from './TypingIndicatorManager.js';
-
+import ChoiceTimerManager from './ChoiceTimerManager.js';
 
 
 import { copyTextToClipboard, warnUser, Request, removeChildrens, timeFormat } from './base.js';
@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	debugTimeController = new DebugTimeController(gameTimeManager);
 	eventRenderer = new EventRenderer();
 	typingIndicatorManager = new TypingIndicatorManager(eventRenderer, chats);
+	choiceTimerManager = new ChoiceTimerManager();
 
 	gameTimeManager.addObserver(debugTimeController);
 	gameTimeManager.addObserver(timelineEventManager);

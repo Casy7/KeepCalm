@@ -23,19 +23,21 @@ class TimelineEventAdapter:
 		choice_event_data['chatId'] = parent_node.chat.id
 		choice_event_data['nodeId'] = parent_node.id
 		choice_event_data['alreadySelected'] = False
+		choice_event_data['type'] = 'choice'
+		choice_event_data['delayMs'] = parent_node.choice_delay_ms
+		choice_event_data['duration'] = parent_node.choice_lasts_for_ms
 
+		
 		for option in option_choices:
 			if user_session is not None and PlayerSelectedNode.objects.filter(player=user_session, node=option).exists():
 				choice_event_data['alreadySelected'] = True
 			option_data = {}
 			option_data['id'] = option.id
 			option_data['text'] = option.choice_text
-
+			option_data['defaultSelectedNode'] = option.default_selected_node
 			choice_event_data['options'].append(option_data)
 
 
-		choice_event_data['type'] = 'choice'
-		choice_event_data['delayMs'] = parent_node.choice_delay_ms
 
 
 

@@ -179,6 +179,7 @@ function loadNodePropertiesToInspectorPanel(id) {
 	document.getElementById("nodeUserChoiceText").value = node.userChoiceText;
 	document.getElementById("nodeDescription").value = node.description;
 	document.getElementById("isNodeAutomaticallyStarted").checked = node.isGameEntryNode;
+	document.getElementById("defaultSelectedNode").checked = node.defaultSelectdNode;
 	document.getElementById("nodeChatSelector").value = node.chatId;
 
 	document.getElementById("inspectorCurrentChatName").innerText = "Chat: " + node.chatName;
@@ -195,6 +196,7 @@ function clearNodePropertiesInInspectorPanel() {
 	document.getElementById("nodeUserChoiceText").value = "";
 	document.getElementById("nodeDescription").value = "";
 	document.getElementById("isNodeAutomaticallyStarted").checked = false;
+	document.getElementById("defaultSelectedNode").checked = false;
 
 	document.getElementById("inspectorCurrentChatName").innerText = "  ";
 	document.getElementById("inspectorChatHeader").innerText = "No node selected";
@@ -438,6 +440,7 @@ async function sendNodeProperties() {
 	const nodeUserChoiceText = document.getElementById("nodeUserChoiceText").value;
 	const nodeChatId = document.getElementById("nodeChatSelector").value;
 	const isNodeAutomaticallyStarted = document.getElementById("isNodeAutomaticallyStarted").checked;
+	const defaultSelectedNode = document.getElementById("defaultSelectedNode").checked;
 	const nodeTimeHChoiceStarts = document.getElementById("timeHChoiceStarts").value;
 	const nodeTimeMChoiceStarts = document.getElementById("timeMChoiceStarts").value;
 	const nodeTimeSChoiceStarts = document.getElementById("timeSChoiceStarts").value;
@@ -451,6 +454,7 @@ async function sendNodeProperties() {
 		'nodeUserChoiceText': nodeUserChoiceText,
 		'chatId': nodeChatId,
 		'isEntryPoint': isNodeAutomaticallyStarted,
+		'defaultSelectedNode': defaultSelectedNode,
 		'delayMs': delayMs,
 		'choiceLastsForMs': choiceLastsForMs
 	}

@@ -66,6 +66,12 @@
 					<input type="checkbox" id="isNodeAutomaticallyStarted">
 					<label for="isNodeAutomaticallyStarted">Game Entry Node</label>
 				</div>
+				
+				<div class="checkbox-container">
+					<input type="checkbox" id="defaultSelectedNode">
+					<label for="defaultSelectedNode">Default selected node</label>
+				</div>
+
 				<select class="form-control dark-control" id="nodeChatSelector">
 					{% for chat in chats %}
 					<option value="{{ chat.id }}">{{ chat.name }}</option>

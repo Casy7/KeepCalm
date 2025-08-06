@@ -18,6 +18,7 @@ class ChatOptionNode(models.Model):
 	type = models.CharField(max_length=50, blank=True, default="choice")
 	choice_delay_ms = models.BigIntegerField(default=0)
 	choice_lasts_for_ms = models.IntegerField(default=10000)
+	default_selected_node = models.BooleanField(default=False)
 
 	pos_x = models.IntegerField(default=0)
 	pos_y = models.IntegerField(default=0)

@@ -1,7 +1,8 @@
 import { removeChildrens, timeFormat, Request, warnUser } from './base.js';
 import { convertTimelineEvents } from './chat.js';
 
-async function selectOption(optionNodeId) {
+
+export async function selectOption(optionNodeId) {
 
 	let rqData = {
 		'nodeId': optionNodeId,
@@ -13,15 +14,39 @@ async function selectOption(optionNodeId) {
 	await rq.send();
 
 	if (rq.result === "success") {
- 
+
 		warnUser("Choice has been made!", "");
 		Object.assign(nodes, rq.recievedData.addedNodes);
 		timelineEventManager.futureTimelineEvents.push(...convertTimelineEvents(rq.recievedData.newTimelineEvents));
+
+		let node = nodes[optionNodeId];
+		let chatId = node.chatId;
+		choiceTimerManager.removeTimer(chatId);
+
+		timelineEventManager.refreshPastAndFutureLists();
+		let timelineEvent = timelineEventManager.pastTimelineEvents.find(te => te.options && te.options.find(childOpt => childOpt.id == node.id)); 
+		timelineEvent["alreadySelected"] = true;
+		removeTimeLineEventOptionsFromSelector(timelineEvent);
 
 	} else {
 
 		console.log(rq.result);
 
+	}
+}
+
+export function removeTimeLineEventOptionsFromSelector(timeLineEvent) {
+	for (let option of timeLineEvent.options) {
+		if (!document.getElementById(`selectOption${option.id}`)) {
+			return;
+		}
+		document.getElementById(`selectOption${option.id}`).className += " selected-option";
+		document.getElementById(`choiceOptionsWrapper`).querySelectorAll(".choice-option").forEach(child => {
+			child.style.animation = "fadeout 0.5s ease-out";
+			setTimeout(async () => {
+				await child.remove();
+			}, 500);
+		});
 	}
 }
 
@@ -100,7 +125,7 @@ export default class EventRenderer {
 
 	buildChoiceSelector(timelineEvent) {
 		const optionContainer = document.getElementById("choiceOptionsWrapper");
-		removeChildrens(optionContainer);
+		removeTimeLineEventOptionsFromSelector(timelineEvent);
 		const chatId = timelineEvent.chatId;
 		if (chatId == activeChatId && !timelineEvent.alreadySelected) {
 
@@ -117,13 +142,16 @@ export default class EventRenderer {
 				</div>`;
 				optionContainer.insertAdjacentHTML("beforeend", htmlTemplate);
 
-				document.getElementById(optionId).addEventListener("click", (event) => {
-					selectOption(event.target.closest(".choice-option").dataset.value);
-					removeChildrens(document.getElementById("choiceOptionsWrapper"));
 
-					timelineEventManager.pastTimelineEvents.find(msg => msg.id == timelineEvent.id)["alreadySelected"] = true;
+				document.getElementById(optionId).addEventListener("click", (event) => {
+					selectOption(choice.id);
+					choiceTimerManager.removeTimer(chatId);
 				})
-			});			
+			});
+		}
+		if (!timelineEvent.alreadySelected) {
+
+			choiceTimerManager.createTimer(timelineEvent);
 		}
 	}
 

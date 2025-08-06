@@ -71,6 +71,7 @@ class FrontendDataAdapter:
                 'isGameEntryNode': EntryNode.objects.filter(node=node).exists(),
                 'choiceDelayMs': node.choice_delay_ms,
 				'choiceLastsForMs': node.choice_lasts_for_ms,
+                'defaultSelectdNode': node.default_selected_node,
                 'nodeSelectedTime': node_selected_time
             }
 

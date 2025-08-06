@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% load static %} 
+{% extends 'base.html' %} {% load static %}
 
 
 {% block csrf_token %}
@@ -7,12 +7,8 @@
 
 {% block page_styles %}
 <link rel="stylesheet" href="{% static 'css/chat.css' %}" type="text/css" />
-<link
-  rel="stylesheet"
-  href="{% static 'css/chat-selector.css' %}"
-  type="text/css"
-/>
-{% endblock %} 
+<link rel="stylesheet" href="{% static 'css/chat-selector.css' %}" type="text/css" />
+{% endblock %}
 
 {% block content %}
 <div class="game-container">
@@ -26,47 +22,31 @@
 
     <div class="chats">
       {% for chat in chats %}
-      <div
-        class="chat chat-menu-line"
-        id="chat-{{ chat.id }}"
-        data-chat-id="{{ chat.id }}"
-        role="button"
-        tabindex="0"
-      >
-        {% if chat.avatar.name != "" %}
-        <img
-          class="message-avatar chat-icon"
-          src="{{ chat.avatar.url }}"
-          alt="avatar"
-        />
-        {% else %}
-        <img
-          class="message-avatar chat-icon"
-          src="{% static 'images/chat_avatars/pedrada.png' %}"
-          alt="avatar"
-        />
-        {% endif %}
-        <div class="chat-info">
-          <p class="chat-header">{{ chat.name }}</p>
-          <p class="chat-last-message" id="chat{{ chat.id }}LastMessage">
-            Ще немає повідомлень
-          </p>
-        </div>
-
-        <div class="chat-status">
-          <div
-            class="chat-unread-mesages"
-            id="chat{{ chat.id }}UnreadMessagesCounter"
-            style="display: none"
-          >
-            0
+      <div class="chat-menu-line chat-menu-line" id="chat-{{ chat.id }}" data-chat-id="{{ chat.id }}" role="button" tabindex="0">
+        <div class="chat-properties-line">
+          {% if chat.avatar.name != "" %}
+          <img class="message-avatar chat-icon" src="{{ chat.avatar.url }}" alt="avatar" />
+          {% else %}
+          <img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar" />
+          {% endif %}
+          <div class="chat-info">
+            <p class="chat-header">{{ chat.name }}</p>
+            <p class="chat-last-message" id="chat{{ chat.id }}LastMessage">
+              Ще немає повідомлень
+            </p>
           </div>
-          <p
-            class="last-message-timestamp"
-            id="chat{{ chat.id }}LastMessageTimestamp"
-          >
-            08:08
-          </p>
+
+          <div class="chat-status">
+            <div class="chat-unread-mesages" id="chat{{ chat.id }}UnreadMessagesCounter" style="display: none">
+              0
+            </div>
+            <p class="last-message-timestamp" id="chat{{ chat.id }}LastMessageTimestamp">
+              08:08
+            </p>
+          </div>
+        </div>
+        <div class="chat-properties-line">
+          <div class="chat-timer-container" id="chat{{ chat.id }}TimerContainer"></div>
         </div>
       </div>
       {% endfor %}
@@ -79,11 +59,7 @@
         <img class="system-icon" src="{% static 'icons/menu.svg' %}" />
       </button>
 
-      <img
-        class="message-avatar chat-icon"
-        src="{% static 'images/chat_avatars/pedrada.png' %}"
-        alt="avatar"
-      />
+      <img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar" />
       <div class="chat-header-col">
         <p class="chat-header" id="activeChatHeader">Пед.рада школи №31</p>
         <p class="chat-status" id="chatStatus">5 online</p>
@@ -91,8 +67,8 @@
     </div>
 
     <div class="messages" id="chatWindow">
-			<p class="empty-message">Оберіть чат</p>
-		</div>
+      <p class="empty-message">Оберіть чат</p>
+    </div>
 
     <div class="input-container">
       <div class="options-wrapper" id="choiceOptionsWrapper">
@@ -127,6 +103,7 @@
   let debugTimeController = null;
   let eventRenderer = null;
   let typingIndicatorManager = null;
+  let choiceTimerManager = null;
   let activeChatId = -1;
 
   const MS_PER_CHAR = 100;

@@ -14,7 +14,7 @@ export default class TypingIndicatorManager {
 
 		const timeout = message.getTypingDelay();
 		const timeoutId = setTimeout(() => {
-			console.log(message.text);
+			// console.log(message.text);
 			this.eventRenderer.buildMessage(message);
 			this.typingTimers.delete(message.id);
 

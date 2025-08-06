@@ -18,6 +18,11 @@ export function exists(querySelectorRule) {
 
 
 export function removeChildrens(parent) {
+	
+	if (!parent) {
+		return;
+	}
+
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
 	}
