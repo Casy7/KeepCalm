@@ -20,28 +20,6 @@ class FrontendDataAdapter:
                 'avatar': str(character.avatar)
             }
 
-        elif isinstance(obj, Message):
-
-            message = obj
-            adapted_obj = {
-                'type': "message",
-                'id': message.id,
-                'chatId': message.node.chat.id,
-                'nodeId': message.node.id,
-                'userId': message.user.id,
-                'username': message.user.username,
-                'fullName': message.user.full_name,
-                'avatar': str(message.user.avatar),
-                'displayColor': message.user.display_color,
-                'text': message.text,
-                'delayMs': str(message.delay_ms),
-                'attachedImage': "",
-                'wasRead': message.was_read,
-                'typingDelayOverride': message.typing_delay_override_ms,
-                'typingSpeed': message.user.typing_speed
-            }
-
-
                 
 
         return adapted_obj
@@ -79,3 +57,33 @@ class FrontendDataAdapter:
             adapted_node["userChoiceText"] = node.choice_text
 
         return adapted_node
+    
+
+    @staticmethod
+    def adapt_message(message):
+        adapted_message = {
+            'id': message.id,
+            'chatId': message.node.chat.id,
+            'nodeId': message.node.id,
+            'userId': message.user.id,
+            'username': message.user.username,
+            'fullName': message.user.full_name,
+            'avatar': str(message.user.avatar),
+            'displayColor': message.user.display_color,
+            'text': message.text,
+            'delayMs': str(message.delay_ms),
+            'attachedImage': "",
+            'wasRead': message.was_read,
+            'typingDelayOverride': message.typing_delay_override_ms,
+            'typingSpeed': message.user.typing_speed,
+            'type': "message"
+        }
+
+        return adapted_message
+    
+
+    @staticmethod
+    def get_total_delay(message):
+
+
+        return 0

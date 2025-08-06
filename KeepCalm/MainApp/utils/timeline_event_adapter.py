@@ -1,12 +1,14 @@
 from MainApp.utils.frontend_data_adapter import FrontendDataAdapter
 from MainApp.models import Message, ChatOptionNode, ChatNodeLink, PlayerSelectedNode
 
+from datetime import datetime
+
 class TimelineEventAdapter:
 	@staticmethod
-	def adapt_message_event(message, node_selected_time=None):
+	def adapt_message_event(message, user_session, start_date):
 
-		message_adapted = FrontendDataAdapter.adapt(message)
-		# message_adapted["typingDelayOverride"] = 10
+		message_adapted = FrontendDataAdapter.adapt_message(message)
+		message_adapted["delayMs"] = TimelineEventAdapter.get_message_total_delay(message, user_session, start_date)
 
 		return message_adapted
 
@@ -37,9 +39,19 @@ class TimelineEventAdapter:
 			option_data['defaultSelectedNode'] = option.default_selected_node
 			choice_event_data['options'].append(option_data)
 
-
-
-
-
-
 		return choice_event_data
+	
+
+	@staticmethod
+	def get_message_total_delay(message, user_session, start_date_str):
+		
+		total_delay = 0
+		total_delay += message.delay_ms
+
+		start_date = datetime.fromisoformat(start_date_str.replace('Z', '+00:00'))
+
+		sending_timedelta = PlayerSelectedNode.objects.filter(player=user_session, node=message.node).first().time_selected - start_date
+
+		total_delay += int(sending_timedelta.total_seconds()*1000)
+
+		return total_delay

@@ -1,5 +1,6 @@
 
 
+from datetime import datetime
 from MainApp.models import Message, ChatOptionNode, PlayerSelectedNode, ChatNodeLink
 from .frontend_data_adapter import FrontendDataAdapter
 from .timeline_event_adapter import TimelineEventAdapter
@@ -12,7 +13,7 @@ class DBHelper:
         messages_frontend_data = {}
 
         for message in messages:
-            message_adapted = FrontendDataAdapter.adapt(message)
+            message_adapted = FrontendDataAdapter.adapt_message(message)
 
             messages_frontend_data[message.id] = message_adapted
 
@@ -30,11 +31,11 @@ class DBHelper:
     
 
     @staticmethod
-    def get_timeline_events(node, user_session = None):
+    def get_timeline_events(node, user_session, start_date):
         timeline_events = []
 
         for message in Message.objects.filter(node=node).order_by('delay_ms'):
-            timeline_events.append(TimelineEventAdapter.adapt_message_event(message))
+            timeline_events.append(TimelineEventAdapter.adapt_message_event(message, user_session, start_date))
 
         if ChatNodeLink.objects.filter(parent=node).filter(child__type='choice').exists():
             timeline_events.append(TimelineEventAdapter.adapt_choice_event(node, user_session))
@@ -45,7 +46,7 @@ class DBHelper:
     
 
     @staticmethod
-    def update_selected_nodes(user_session, new_node = None):
+    def update_selected_nodes(user_session, new_node = None, start_date = None):
 
         new_nodes = []
 
@@ -64,7 +65,7 @@ class DBHelper:
 
         for automatically_added_node in new_nodes:
             if not PlayerSelectedNode.objects.filter(player=user_session, node=automatically_added_node).exists():
-                PlayerSelectedNode.objects.create(player=user_session, node=automatically_added_node)
+                PlayerSelectedNode.objects.create(player=user_session, node=automatically_added_node, time_selected=start_date)
 
         return new_nodes
         

@@ -83,6 +83,19 @@ export default class EventRenderer {
 			let lastMessageUserId = null;
 
 			const today = new Date(message.timestamp.getFullYear(), message.timestamp.getMonth(), message.timestamp.getDate());
+			
+			let senderIsPlayerTemplate = "incoming";
+			let imageTemplate = `<img class="message-avatar" src="/media/${message.avatar}" alt="avatar"> `;
+			let messageTimestamp = `<label class="message-timestamp">${timeFormat(message.timestamp - today, true)}</label> `;
+			let messageTimestampBefore = "";
+			let messageTimestampAfter = messageTimestamp;
+
+			if (message.username == "hero") {
+				senderIsPlayerTemplate = "outgoing";
+				imageTemplate = "";
+				messageTimestampBefore = messageTimestamp;
+				messageTimestampAfter = "";
+			}
 
 			if (lastMessage != null) {
 
@@ -96,20 +109,23 @@ export default class EventRenderer {
 					<div class="message" style="background-color: ${message.displayColor};">
 						<div class="message-content-line" id="message-${message.id}"> 
 							<p class="message-text">${message.text}</p> 
-							<label class="message-timestamp">${timeFormat(message.timestamp - today)}</label> 
+							${messageTimestampAfter}
 						</div> 
 					</div> `);
 			}
 			else {
 				let htmlTemplate = `
-				<div class="message-wrapper incoming" data-user-id="${message.userId}" id="message${message.id}"> 
-					<img class="message-avatar" src="/media/${message.avatar}" alt="avatar"> 
+				<div class="message-wrapper ${senderIsPlayerTemplate}" data-user-id="${message.userId}" id="message${message.id}"> 
+					${imageTemplate}
+					${messageTimestampBefore}
 					<div class="messages-block"> 
+					
 						<div class="message" style="background-color: ${message.displayColor};"> 
+						
 							<div class="message-username">${message.fullName}</div> 
 							<div class="message-content-line" id="message-${message.id}"> 
 								<p class="message-text">${message.text}</p> 
-								<label class="message-timestamp">${timeFormat(message.timestamp - today)}</label> 
+								${messageTimestampAfter}
 							</div> 
 						</div> 
 					</div>

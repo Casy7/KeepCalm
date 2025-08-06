@@ -46,7 +46,7 @@ class MainChatPage(View):
 			player_session = PlayerSession.objects.get(user_session_code=session_code)
 
 		player_selected_nodes = [selected_node.node for selected_node in PlayerSelectedNode.objects.filter(player=player_session)]
-		extend_unique(player_selected_nodes, db.update_selected_nodes(player_session))
+		extend_unique(player_selected_nodes, db.update_selected_nodes(player_session, None, START_DATE))
 		
 		context["player_session"] = player_session
 		context["sessionCode"] = session_code
@@ -62,7 +62,7 @@ class MainChatPage(View):
 		timeline_events = []
 		for node in player_selected_nodes:
 
-			timeline_events += db.get_timeline_events(node, player_session)
+			timeline_events += db.get_timeline_events(node, player_session, START_DATE)
 
 		context["timelineEvents"] = json.dumps(timeline_events, cls=DjangoJSONEncoder)
 
@@ -422,11 +422,11 @@ class AjaxUserSelectsOption(View):
 		player_selected_node = ChatOptionNode.objects.get(id=node_id)
   		
 		response = {}
-		automatically_added_nodes = db.update_selected_nodes(player_session, player_selected_node)
+		automatically_added_nodes = db.update_selected_nodes(player_session, player_selected_node, node_selected_time)
 		response["newTimelineEvents"] = []
 		
 		for node in automatically_added_nodes: 
-			response["newTimelineEvents"] += db.get_timeline_events(node, player_session)
+			response["newTimelineEvents"] += db.get_timeline_events(node, player_session, START_DATE)
 
 		response['addedNodes'] = [FrontendDataAdapter.adapt_node(adapted_node, node_selected_time) for adapted_node in automatically_added_nodes]
 		
