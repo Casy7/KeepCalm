@@ -63,9 +63,9 @@ class DBHelper:
         for new_node in new_nodes:
             new_nodes += DBHelper.rec_get_next_new_nodes(new_node, [])   
 
-        for automatically_added_node in new_nodes:
-            if not PlayerSelectedNode.objects.filter(player=user_session, node=automatically_added_node).exists():
-                PlayerSelectedNode.objects.create(player=user_session, node=automatically_added_node, time_selected=start_date)
+        for new_node in new_nodes:
+            if not PlayerSelectedNode.objects.filter(player=user_session, node=new_node).exists():
+                PlayerSelectedNode.objects.create(player=user_session, node=new_node, time_selected=start_date)
 
         return new_nodes
         

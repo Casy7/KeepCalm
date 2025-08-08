@@ -1,17 +1,17 @@
-
-import LocalStorageManager from './localStorageManager.js';
-import { copyTextToClipboard, warnUser, Request } from './base.js';
-
+import LocalStorageManager from "./localStorageManager.js";
+import { copyTextToClipboard, warnUser, Request } from "./base.js";
+import { AudioManager } from "./AudioManager.js";
+import SoundController from "./SoundController.js";
 
 document.getElementById("copyCodeButton").addEventListener("click", () => {
 	copyCode();
+	audioManager.play("click", "sfx", 30);
 });
-
 
 document.getElementById("startGameButton").addEventListener("click", () => {
 	startGame();
+	audioManager.play("click", "sfx", 30);
 });
-
 
 document.getElementById("previousGameSessionCodeInput").addEventListener("input", () => {
 	validateCode();
@@ -23,9 +23,7 @@ function copyCode() {
 	warnUser("Copied!", "", "gray");
 }
 
-
 function validateCode() {
-
 	const codeInputField = document.getElementById("previousGameSessionCodeInput");
 	let userSessionCode = codeInputField.value;
 
@@ -34,7 +32,7 @@ function validateCode() {
 		return;
 	}
 
-	const cleaned = userSessionCode.toUpperCase().replace(/[^A-Z0-9]/g, '');
+	const cleaned = userSessionCode.toUpperCase().replace(/[^A-Z0-9]/g, "");
 
 	if (userSessionCode == "") {
 		codeInputField.value = "";
@@ -43,7 +41,6 @@ function validateCode() {
 
 	codeInputField.value = "#" + cleaned;
 }
-
 
 async function startGame() {
 	let userPreviousSessionCode = document.getElementById("previousGameSessionCodeInput").value;
@@ -55,36 +52,24 @@ async function startGame() {
 		if (rq.result === "success") {
 			if (rq.recievedData.userSessionCodeExists) {
 				loadGame(userPreviousSessionCode);
-			}
-			else {
+			} else {
 				warnUser("Цієї ігрової сесії не знайдено", "", "gray");
 			}
 		} else {
 			console.warn("Щось тут не фуричить.");
 		}
-	}
-	else {
+	} else {
 		loadGame(document.getElementById("startGameCode").innerText.replace(/#/g, ""));
 	}
 }
 
-
 function loadGame(code) {
-
 	LocalStorageManager.set("userSessionCode", code);
 	window.location.href = `/game/${code}/`;
 }
 
-
 function startLogoGlitch() {
-	const glitchIds = [
-		"logo_glitch_1",
-		"logo_glitch_2",
-		"logo_glitch_3",
-		"logo_glitch_4",
-		"logo_glitch_5",
-		"logo_glitch_6"
-	];
+	const glitchIds = ["logo_glitch_1", "logo_glitch_2", "logo_glitch_3", "logo_glitch_4", "logo_glitch_5", "logo_glitch_6"];
 	const logoMen = document.getElementById("logo_men");
 
 	if (!logoMen) {
@@ -93,10 +78,8 @@ function startLogoGlitch() {
 	}
 
 	function glitchCycle() {
-		// Сделать logo_men полупрозрачным
 		logoMen.style.opacity = "0.269";
 
-		// Выбираем 2 разных случайных глитча
 		let indices = [...glitchIds.keys()];
 		let i1 = indices.splice(Math.floor(Math.random() * indices.length), 1)[0];
 		let i2 = indices[Math.floor(Math.random() * indices.length)];
@@ -109,20 +92,17 @@ function startLogoGlitch() {
 			return;
 		}
 
-		// Показать первый глитч
 		glitch1.style.display = "inline";
+		audioManager.play("glitch", "sfx", 30);
 
 		setTimeout(() => {
-			// Скрыть первый, показать второй
 			glitch1.style.display = "none";
 			glitch2.style.display = "inline";
 
 			setTimeout(() => {
-				// Скрыть второй, вернуть нормальный логотип
 				glitch2.style.display = "none";
 				logoMen.style.opacity = "1";
 
-				// Подождать от 3 до 10 секунд
 				let delay = 3000 + Math.random() * 7000;
 				setTimeout(glitchCycle, delay);
 			}, 100);
@@ -133,4 +113,23 @@ function startLogoGlitch() {
 }
 
 
-document.addEventListener("DOMContentLoaded", startLogoGlitch);
+async function startMusic() {
+	audioManager.createChannel("sfx");
+	audioManager.createChannel("music");
+	soundController = new SoundController();
+
+	await audioManager.buffer("click", "/static/audio/button_click_modern.mp3");
+	await audioManager.buffer("glitch", "/static/audio/glitch_tv.mp3");
+	await audioManager.buffer("music", "/static/audio/nervous_music.mp3");
+
+	audioManager.play("music", "music", 30, true);
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+	audioManager = new AudioManager();
+
+	startLogoGlitch();
+	startMusic();
+});

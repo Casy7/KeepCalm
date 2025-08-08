@@ -2,37 +2,55 @@
 {% load static %}
 
 {% block csrf_token %}
-{% csrf_token %}
+  {% csrf_token %}
 {% endblock %}
 
 {% block page_styles %}
-<link href="{% static 'css/start-game.css' %}" rel="stylesheet"/>
+  <link href="{% static 'css/start-game.css' %}" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
+  <div class="svg-wrapper svg-top-right-container">
+    {% load svg_tag %}
+    {% inline_svg 'images/full_background_logo.svg' as glitch_logo %}
+    {{ glitch_logo|safe }}
+  </div>
 
-<div class="svg-wrapper svg-top-right-container">
-	{% load svg_tag %}
-	{% inline_svg 'images/full_background_logo.svg' as glitch_logo %}
-	{{ glitch_logo|safe }}
-</div>
+  <div class="start-game-form">
+    <img src="{% static 'images/text_logo.svg' %}" alt="" class="start-game-logo" role="presentation" />
+    <div class="row start-game-code-row">
+      <h1 class="start-game-code" id="startGameCode">#{{ code }}</h1>
+      <button class="btn btn-outline-secondary copy-code-button" id="copyCodeButton"><img class="big-icon" src="{% static 'icons/copy.svg' %}" alt="" /></button>
+    </div>
+    <h3 class="start-game-description">Збережіть код, щоб не втратити прогрес</h3>
+    <h3 class="start-game-description">або введіть код, щоб відтворити попередню гру.</h3>
+    <input type="text" id="previousGameSessionCodeInput" minlength="6" maxlength="7" placeholder="Введіть код..." class="form-control code-input" />
+    <button class="btn btn-outline-secondary start-game-button" id="startGameButton">Почати гру!</button>
+  </div>
+{% endblock %}
 
-<div class="start-game-form">
-	<img src="{% static 'images/text_logo.svg' %}" alt="" class="start-game-logo" role="presentation">
-	<div class="row start-game-code-row">
-		<h1 class="start-game-code" id="startGameCode">#{{ code }}</h1>
-		<button class="btn btn-outline-secondary copy-code-button" id="copyCodeButton">
-			<img class="big-icon" src="{% static 'icons/copy.svg' %}" alt="">
-		</button>
-	</div>
-	<h3 class="start-game-description">Збережіть код, щоб не втратити прогрес</h3>
-	<h3 class="start-game-description">або введіть код, щоб відтворити попередню гру.</h3>
-	<input type="text" id="previousGameSessionCodeInput" minlength="6" maxlength="7" placeholder="Введіть код..." class="form-control code-input">
-	<button class="btn btn-outline-secondary start-game-button" id="startGameButton">Почати гру!</button>
-</div>
+{% block sound_panel %}
+  <div class="container sound-panel">
+    <div class="sound-control-buttons-container">
+      <button id="btnMusic" class="btn btn-outline-secondary"><img class="icon" src="{% static 'icons/music.svg' %}" alt="" /></button>
+      <button id="btnSfx" class="btn btn-outline-secondary"><img class="icon" src="{% static 'icons/sfx.svg' %}" alt="" /></button>
+    </div>
 
+    <div id="sliders" class="sound-control-sliders-container">
+      <div class="d-none slider-container">
+        <input type="range" min="0" max="100" value="80" class="vertical-slider" id="sliderMusic" />
+      </div>
+      <div class="d-none slider-container sfx-slider-container">
+        <input type="range" min="0" max="100" value="100" class="vertical-slider" id="sliderSfx" />
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block page_scripts %}
-<script src="{% static 'js/startGame.js' %}" type="module"></script>
+  <script src="{% static 'js/startGame.js' %}" type="module"></script>
+  <script>
+    let audioManager = null
+    let soundController = null
+  </script>
 {% endblock %}
