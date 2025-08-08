@@ -51,7 +51,7 @@ async function startGame() {
 
 		if (rq.result === "success") {
 			if (rq.recievedData.userSessionCodeExists) {
-				loadGame(userPreviousSessionCode);
+				loadGame(userPreviousSessionCode.replace(/#/g, ""));
 			} else {
 				warnUser("Цієї ігрової сесії не знайдено", "", "gray");
 			}

@@ -100,6 +100,14 @@ h3 {
 	margin-bottom: 30px;
 }
 
+.form-control.code-input:active {
+	box-shadow: none
+}
+
+.form-control.code-input:hover {
+	box-shadow: none
+}
+
 .form-control.code-input::placeholder {
 	font-family: "Roboto", "Roboto-Black", Tahoma;
 }
