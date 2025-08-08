@@ -12,7 +12,7 @@
 
 {% block content %}
 <div class="game-container">
-  <div class="chat-container">
+  <div class="chat-container chat-list-container">
     <div class="nav-container">
       <button class="system-button wheat chat-menu-btn">
         <img class="system-icon" src="{% static 'icons/menu.svg' %}" />
@@ -53,12 +53,8 @@
     </div>
   </div>
 
-  <div class="chat-container">
+  <div class="chat-container chat-messages-container">
     <div class="nav-container">
-      <button class="system-button wheat chat-menu-btn">
-        <img class="system-icon" src="{% static 'icons/menu.svg' %}" />
-      </button>
-
       <img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar" />
       <div class="chat-header-col">
         <p class="chat-header" id="activeChatHeader">Пед.рада школи №31</p>

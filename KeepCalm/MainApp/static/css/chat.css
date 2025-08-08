@@ -14,6 +14,18 @@
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
+	min-width: 400px;
+}
+
+.chat-list-container {
+	min-width: 200px;
+	border-bottom-right-radius: 0px;
+	border-top-right-radius: 0px;
+}
+
+.chat-messages-container {
+	border-bottom-left-radius: 0px;
+	border-top-left-radius: 0px;
 }
 
 .messages {
@@ -195,13 +207,11 @@
 }
 
 .input-container button img {
-	filter: invert(39%) sepia(80%) saturate(61%) hue-rotate(10deg)
-		brightness(90%) contrast(90%);
+	filter: invert(39%) sepia(80%) saturate(61%) hue-rotate(10deg) brightness(90%) contrast(90%);
 }
 
 .system-button.wheat {
-	filter: invert(39%) sepia(80%) saturate(61%) hue-rotate(10deg)
-		brightness(90%) contrast(90%);
+	filter: invert(39%) sepia(80%) saturate(61%) hue-rotate(10deg) brightness(90%) contrast(90%);
 }
 
 .system-icon {
@@ -235,6 +245,10 @@
 	font-family: "Roboto", "Roboto-Black", Tahoma;
 	font-size: 1.2em;
 	margin-bottom: 0px;
+	text-wrap: none;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .chat-status {
