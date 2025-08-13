@@ -73,6 +73,8 @@ class ChatMember(models.Model):
 class PlayerSession(models.Model):
 	user_session_code = models.CharField(max_length=80, unique=True)
 	in_game_time = models.IntegerField(default=0)
+	volume_sfx = models.IntegerField(default=0)
+	volume_music = models.IntegerField(default=0)
 
 
 class PlayerSelectedNode(models.Model):

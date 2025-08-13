@@ -1,109 +1,133 @@
 {% extends 'base.html' %} {% load static %}
 
-
 {% block csrf_token %}
-{% csrf_token %}
+  {% csrf_token %}
 {% endblock %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="{% static 'css/chat.css' %}" type="text/css" />
-<link rel="stylesheet" href="{% static 'css/chat-selector.css' %}" type="text/css" />
+  <link rel="stylesheet" href="{% static 'css/chat.css' %}" type="text/css" />
+  <link rel="stylesheet" href="{% static 'css/chat-selector.css' %}" type="text/css" />
 {% endblock %}
 
 {% block content %}
-<div class="game-container">
-  <div class="chat-container chat-list-container">
-    <div class="nav-container">
-      <button class="system-button wheat chat-menu-btn">
-        <img class="system-icon" src="{% static 'icons/menu.svg' %}" />
-      </button>
-      <p class="messager-header">Pawgram</p>
-    </div>
+  <div class="game-container">
+    <div class="chat-container chat-list-container">
+      <div class="nav-container">
+        <button class="system-button wheat chat-menu-btn"><img class="system-icon" src="{% static 'icons/menu.svg' %}" /></button>
+        <p class="messager-header">Pawgram</p>
+      </div>
 
-    <div class="chats">
-      {% for chat in chats %}
-      <div class="chat-menu-line chat-menu-line" id="chat-{{ chat.id }}" data-chat-id="{{ chat.id }}" role="button" tabindex="0">
-        <div class="chat-properties-line">
-          {% if chat.avatar.name != "" %}
-          <img class="message-avatar chat-icon" src="{{ chat.avatar.url }}" alt="avatar" />
-          {% else %}
-          <img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar" />
-          {% endif %}
-          <div class="chat-info">
-            <p class="chat-header">{{ chat.name }}</p>
-            <p class="chat-last-message" id="chat{{ chat.id }}LastMessage">
-              Ще немає повідомлень
-            </p>
-          </div>
+      <div class="chats">
+        {% for chat in chats %}
+          <div class="chat-menu-line chat-menu-line" id="chat-{{ chat.id }}" data-chat-id="{{ chat.id }}" role="button" tabindex="0">
+            <div class="chat-properties-line">
+              {% if chat.avatar.name != '' %}
+                <img class="message-avatar chat-icon" src="{{ chat.avatar.url }}" alt="avatar" />
+              {% else %}
+                <img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar" />
+              {% endif %}
+              <div class="chat-info">
+                <p class="chat-header">{{ chat.name }}</p>
+                <p class="chat-last-message" id="chat{{ chat.id }}LastMessage">Ще немає повідомлень</p>
+              </div>
 
-          <div class="chat-status">
-            <div class="chat-unread-mesages" id="chat{{ chat.id }}UnreadMessagesCounter" style="display: none">
-              0
+              <div class="chat-status">
+                <div class="chat-unread-mesages" id="chat{{ chat.id }}UnreadMessagesCounter" style="display: none">0</div>
+                <p class="last-message-timestamp" id="chat{{ chat.id }}LastMessageTimestamp">08:08</p>
+              </div>
             </div>
-            <p class="last-message-timestamp" id="chat{{ chat.id }}LastMessageTimestamp">
-              08:08
-            </p>
+            <div class="chat-properties-line">
+              <div class="chat-timer-container" id="chat{{ chat.id }}TimerContainer"></div>
+            </div>
           </div>
-        </div>
-        <div class="chat-properties-line">
-          <div class="chat-timer-container" id="chat{{ chat.id }}TimerContainer"></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="chat-container chat-messages-container">
+      <div class="nav-container">
+        <img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar" />
+        <div class="chat-header-col">
+          <p class="chat-header" id="activeChatHeader">Пед.рада школи №31</p>
+          <p class="chat-status" id="chatStatus">5 online</p>
         </div>
       </div>
-      {% endfor %}
+
+      <div class="messages" id="chatWindow">
+        <p class="empty-message">Оберіть чат</p>
+      </div>
+
+      <div class="input-container">
+        <div class="options-wrapper" id="choiceOptionsWrapper"></div>
+      </div>
     </div>
   </div>
 
-  <div class="chat-container chat-messages-container">
-    <div class="nav-container">
-      <img class="message-avatar chat-icon" src="{% static 'images/chat_avatars/pedrada.png' %}" alt="avatar" />
-      <div class="chat-header-col">
-        <p class="chat-header" id="activeChatHeader">Пед.рада школи №31</p>
-        <p class="chat-status" id="chatStatus">5 online</p>
+  <div class="debug-time-controller">
+    <button class="system-button" id="decrease-time">Stop|Start</button>
+    <button class="system-button" id="decreaseTimeByOneHour">--</button>
+    <button class="system-button" id="decreaseTimeByOneMinute">-</button>
+    <input type="text" class="debug-time-field" id="debugTime" />
+    <button class="system-button" id="increaseTimeByOneMinute">+</button>
+    <button class="system-button" id="increaseTimeByOneHour">++</button>
+    <button class="system-button" id="set-new-time">Set New Time</button>
+  </div>
+
+  <div class="route-script-container">
+
+  </div>
+{% endblock %}
+
+
+{% block sound_panel %}
+  <div class="container sound-panel">
+
+    <div class="sound-control-buttons-container">
+      <button id="btnMusic" class="btn btn-outline-secondary"><img class="icon" src="{% static 'icons/music.svg' %}" alt="" /></button>
+      <button id="btnSfx" class="btn btn-outline-secondary"><img class="icon" src="{% static 'icons/sfx.svg' %}" alt="" /></button>
+    </div>
+
+    <div id="sliders" class="sound-control-sliders-container">
+      <div class="d-none slider-container">
+        <input type="range" min="0" max="100" value="80" class="vertical-slider" id="sliderMusic" />
       </div>
-    </div>
-
-    <div class="messages" id="chatWindow">
-      <p class="empty-message">Оберіть чат</p>
-    </div>
-
-    <div class="input-container">
-      <div class="options-wrapper" id="choiceOptionsWrapper">
-
+      <div class="d-none slider-container sfx-slider-container">
+        <input type="range" min="0" max="100" value="100" class="vertical-slider" id="sliderSfx" />
       </div>
     </div>
   </div>
-</div>
+{% endblock %}
 
-<div class="debug-time-controller">
-  <button class="system-button" id="decrease-time">Stop|Start</button>
-  <button class="system-button" id="decreaseTimeByOneHour">--</button>
-  <button class="system-button" id="decreaseTimeByOneMinute">-</button>
-  <input type="text" class="debug-time-field" id="debugTime" />
-  <button class="system-button" id="increaseTimeByOneMinute">+</button>
-  <button class="system-button" id="increaseTimeByOneHour">++</button>
-  <button class="system-button" id="set-new-time">Set New Time</button>
-</div>
-{% endblock %} {% block js_data %}
-<script>
-  const startGameDatetime = `{{ startGameDatetime }}`;
-  const sessionCode = `{{ sessionCode }}`;
 
-  let timelineEventsJSON = JSON.parse(`{{ timelineEvents|safe }}`);
-  let users = JSON.parse(`{{ characters|safe }}`);
-  let chats = JSON.parse(`{{ chatsJSON|safe }}`);
-  let nodes = JSON.parse(`{{ nodes|safe }}`);
+{% block js_data %}
+  <script>
+    const startGameDatetime = `{{ startGameDatetime }}`;
+    const sessionCode = `{{ sessionCode }}`;
+    
+    let timelineEventsJSON = JSON.parse(`{{ timelineEvents|safe }}`);
+    let users = JSON.parse(`{{ characters|safe }}`);
+    let chats = JSON.parse(`{{ chatsJSON|safe }}`);
+    let nodes = JSON.parse(`{{ nodes|safe }}`);
 
-  let timelineEvents = null;
-  let timelineEventManager = null;
-  let gameTimeManager = null;
-  let debugTimeController = null;
-  let eventRenderer = null;
-  let typingIndicatorManager = null;
-  let choiceTimerManager = null;
-  let activeChatId = -1;
+    let audioManager = null;
+    let soundController = null;
+    
+    let timelineEvents = null;
+    let timelineEventManager = null;
+    let gameTimeManager = null;
+    let debugTimeController = null;
+    let eventRenderer = null;
+    let typingIndicatorManager = null;
+    let choiceTimerManager = null;
 
-  const MS_PER_CHAR = 100;
-</script>
-{% endblock %} {% block page_scripts %}
-<script src="{% static 'js/chat.js' %}" type="module"></script>
+    let activeChatId = -1;
+    let soundVolume = 0;
+    let sfxVolume = 0;
+    
+    const MS_PER_CHAR = 100
+  </script>
+{% endblock %}
+
+{% block page_scripts %}
+  <script src="{% static 'js/chat.js' %}" type="module"></script>
 {% endblock %}

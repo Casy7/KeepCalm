@@ -1,4 +1,4 @@
-export class AudioManager {
+export default class AudioManager {
     constructor() {
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         this.channels = {}; // channelName -> GainNode

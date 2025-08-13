@@ -1,6 +1,6 @@
 import LocalStorageManager from "./localStorageManager.js";
 import { copyTextToClipboard, warnUser, Request } from "./base.js";
-import { AudioManager } from "./AudioManager.js";
+import  AudioManager from "./AudioManager.js";
 import SoundController from "./SoundController.js";
 
 document.getElementById("copyCodeButton").addEventListener("click", () => {
@@ -65,6 +65,8 @@ async function startGame() {
 
 function loadGame(code) {
 	LocalStorageManager.set("userSessionCode", code);
+	LocalStorageManager.set("musicVolume", parseInt(audioManager.channels["music"].gain.value * 100));
+	LocalStorageManager.set("sfxVolume", parseInt(audioManager.channels["sfx"].gain.value * 100));	
 	window.location.href = `/game/${code}/`;
 }
 
@@ -121,6 +123,9 @@ async function startMusic() {
 	await audioManager.buffer("click", "/static/audio/button_click_modern.mp3");
 	await audioManager.buffer("glitch", "/static/audio/glitch_tv.mp3");
 	await audioManager.buffer("music", "/static/audio/nervous_music.mp3");
+
+	audioManager.changeSoundLevel("music",  parseInt(sliderMusic.value, 10));
+	audioManager.changeSoundLevel("sfx", parseInt(sliderSfx.value, 10));
 
 	audioManager.play("music", "music", 30, true);
 }

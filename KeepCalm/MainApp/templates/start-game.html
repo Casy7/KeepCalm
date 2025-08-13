@@ -31,6 +31,7 @@
 
 {% block sound_panel %}
   <div class="container sound-panel">
+
     <div class="sound-control-buttons-container">
       <button id="btnMusic" class="btn btn-outline-secondary"><img class="icon" src="{% static 'icons/music.svg' %}" alt="" /></button>
       <button id="btnSfx" class="btn btn-outline-secondary"><img class="icon" src="{% static 'icons/sfx.svg' %}" alt="" /></button>
@@ -47,10 +48,15 @@
   </div>
 {% endblock %}
 
+
+{% block language_selector %}
+
+{% endblock %}
+
 {% block page_scripts %}
   <script src="{% static 'js/startGame.js' %}" type="module"></script>
   <script>
-    let audioManager = null
-    let soundController = null
+    let audioManager = null;
+    let soundController = null;
   </script>
 {% endblock %}

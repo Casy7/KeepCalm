@@ -6,6 +6,8 @@ import EventRenderer from './EventRenderer.js';
 import TimelineEvent from './TimelineEvent.js';
 import TypingIndicatorManager from './TypingIndicatorManager.js';
 import ChoiceTimerManager from './ChoiceTimerManager.js';
+import AudioManager from './AudioManager.js';
+import SoundController from './SoundController.js';
 
 
 import { copyTextToClipboard, warnUser, Request, removeChildrens, timeFormat } from './base.js';
@@ -37,6 +39,11 @@ document.addEventListener("DOMContentLoaded", () => {
 	gameTimeManager.start();
 
 	console.log(LocalStorageManager.get("code"));
+
+	audioManager = new AudioManager();
+	soundController = new SoundController();
+
+	startMusic();
 
 });
 
@@ -91,3 +98,24 @@ export function convertTimelineEvents(events) {
 }
 
 
+async function startMusic() {
+	audioManager.createChannel("sfx");
+	audioManager.createChannel("music");
+
+	await audioManager.buffer("click", "/static/audio/button_click_modern.mp3");
+	await audioManager.buffer("glitch", "/static/audio/glitch_tv.mp3");
+	await audioManager.buffer("music", "/static/audio/nervous_music.mp3");
+
+	const savedMusicVolume = LocalStorageManager.get("musicVolume");
+	const savedSfxVolume = LocalStorageManager.get("sfxVolume");
+
+	if (savedMusicVolume != null && savedSfxVolume != null) {
+		document.getElementById("sliderMusic").value = savedMusicVolume;
+		document.getElementById("sliderSfx").value = savedSfxVolume;
+	}
+
+	audioManager.changeSoundLevel("music", parseInt(sliderMusic.value, 10));
+	audioManager.changeSoundLevel("sfx", parseInt(sliderSfx.value, 10));
+
+	audioManager.play("music", "music", 30, true);
+}
