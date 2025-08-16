@@ -2,14 +2,14 @@ import json
 from datetime import datetime, timedelta
 
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, FileResponse
 from django.shortcuts import render
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth import authenticate, login, logout
 from django.views.generic import View
 
 
-from MainApp.models import User, Chat, ChatOptionNode, ChatMember, Character, Message, PlayerSession, PlayerSelectedNode, EntryNode
+from MainApp.models import User, Chat, ChatOptionNode, ChatMember, Character, Message, PlayerSession, PlayerSelectedNode, EntryNode, RouteImage
 from .utils import chat_structure_parser as csp
 from .utils.session_manager import SessionManager
 from .utils.db_helper import DBHelper as db
@@ -436,3 +436,8 @@ class AjaxUserSelectsOption(View):
 			json.dumps(response),
 			content_type="application/json"
 		)
+
+
+class GetRouteImage(View):
+	def get(self, request, name):
+		return FileResponse(open(settings.MEDIA_ROOT + "/route_images/" + name, "rb"))

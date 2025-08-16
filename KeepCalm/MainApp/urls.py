@@ -35,6 +35,7 @@ urlpatterns = [
 	path("delete_node_message/", AjaxEditorDeleteMessage.as_view(), name="delete_node_message"),
 	path("get_editor_node_structure/", AjaxGetEditorNodeStructure.as_view(), name="get_node_structure"),
 	path("select_option/", AjaxUserSelectsOption.as_view(), name="select_option"),
+	path("route_image/<slug:name>", GetRouteImage.as_view(), name="get_route_image"),
 
 	path("signin/", SignIn.as_view(), name="login"),
     path("signout/", Logout.as_view(), name="logout"),

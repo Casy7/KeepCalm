@@ -69,6 +69,11 @@ class ChatMember(models.Model):
 		]
 
 
+class RouteImage(models.Model):
+    name = models.SlugField(unique=True)
+    file = models.FileField(upload_to="images/route")
+
+
 
 class PlayerSession(models.Model):
 	user_session_code = models.CharField(max_length=80, unique=True)
@@ -86,5 +91,8 @@ class PlayerSelectedNode(models.Model):
 		constraints = [
 			models.UniqueConstraint(fields=['player', 'node'], name='unique_player_selected_node')
 		]
+
+
+
 
 
