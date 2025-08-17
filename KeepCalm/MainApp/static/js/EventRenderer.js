@@ -7,7 +7,8 @@ export async function selectOption(optionNodeId) {
 	let rqData = {
 		'nodeId': optionNodeId,
 		'userSessionCode': sessionCode,
-		'nodeSelectedTime': gameTimeManager.now()
+		'nodeSelectedTime': gameTimeManager.now(),
+		'nodeSelectedTimeMs': gameTimeManager.nowMs()
 	}
 
 	const rq = new Request({ url: `/select_option/`, data: rqData });

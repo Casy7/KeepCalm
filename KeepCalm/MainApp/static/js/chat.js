@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	gameTimeManager.addObserver(debugTimeController);
 	gameTimeManager.addObserver(timelineEventManager);
 
+	gameTimeManager.setTimeMs(lastStoredInGameTime);
 
 	for (let i = 0; i < timelineEventManager.pastTimelineEvents.length; i++) {
 		eventRenderer.buildTemplate(timelineEventManager.pastTimelineEvents[i]);

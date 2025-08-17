@@ -83,7 +83,7 @@ export class ChoiceTimer {
 		timerContainer.insertAdjacentHTML("beforeend", timerTemplate);
 
 		this.timerObj = document.querySelector(`#chat${this.chatId}TimerContainer .progress-bar`);
-		this.delayAtStart = gameTimeManager.inGameTimeMs;
+		this.delayAtStart = gameTimeManager.nowMs();
 		this.updateTimer();
 	}
 
@@ -94,7 +94,7 @@ export class ChoiceTimer {
 
 		let startTime = this.delayAtStart;
 		let finishTime = this.delayAtStart + this.duration;
-		let currentTime = gameTimeManager.inGameTimeMs;
+		let currentTime = gameTimeManager.nowMs();
 		this.persent = 100 - ((currentTime - startTime) / (finishTime - startTime)) * 100;
 
 		this.timerObj.style.width = this.persent + "%";

@@ -103,6 +103,7 @@
   <script>
     const startGameDatetime = `{{ startGameDatetime }}`;
     const sessionCode = `{{ sessionCode }}`;
+    const lastStoredInGameTime = parseInt("{{ inGameTimeMs }}");
     
     let timelineEventsJSON = JSON.parse(`{{ timelineEvents|safe }}`);
     let users = JSON.parse(`{{ characters|safe }}`);

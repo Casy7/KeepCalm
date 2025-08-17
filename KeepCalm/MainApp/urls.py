@@ -16,6 +16,7 @@ from .views import (
 	AjaxGetEditorNodeStructure,
 	AjaxEditorCreateNode,
 	AjaxUserSelectsOption,
+	GetRouteImage,
 	SignIn,
 	SignUp,
 	Logout,

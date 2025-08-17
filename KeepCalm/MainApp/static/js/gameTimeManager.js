@@ -10,15 +10,13 @@ export default class GameTimeManager extends Observable {
 		GameTimeManager._instance = this;
 
 		this.tickRate = 1000;
-		this.startGameDatetime = startGameDatetime;
+		this.startGameDatetime = new Date(startGameDatetime);
 		this.inGameTime = new Date(startGameDatetime);
-		this.inGameTimeMs = 0;
 		this._intervalId = null;
 	}
 
 	tick() {
 		this.inGameTime.setTime(this.inGameTime.getTime() + this.tickRate);
-		this.inGameTimeMs += this.tickRate;
 	}
 
 	_tickAndNotify() {
@@ -48,4 +46,17 @@ export default class GameTimeManager extends Observable {
 		return new Date(this.inGameTime);
 	}
 
+	nowMs() {
+		return this.inGameTime - this.startGameDatetime;
+	}
+
+	setTime(time) {
+		this.inGameTime = new Date(time);
+	}
+
+	setTimeMs(timeMs) {
+		let newDateTime = new Date(this.startGameDatetime);
+		newDateTime.setTime(newDateTime.getTime() + timeMs);
+		this.setTime(newDateTime);
+	}
 }

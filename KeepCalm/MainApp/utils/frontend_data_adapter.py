@@ -76,7 +76,7 @@ class FrontendDataAdapter:
             'wasRead': message.was_read,
             'typingDelayOverride': message.typing_delay_override_ms,
             'typingSpeed': message.user.typing_speed,
-            'type': "message"
+            'type': "message",
         }
 
         return adapted_message

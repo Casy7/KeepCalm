@@ -24,4 +24,29 @@ async function firstScene() {
 }
 
 
+class ImageCache {
+  constructor(limit = 20) {
+    this.limit = limit;
+    this.map = new Map(); // url -> {img, atime}
+  }
+  async get(url) {
+    if (this.map.has(url)) {
+      const item = this.map.get(url);
+      item.atime = performance.now();
+      return item.img;
+    }
+    const img = await preloadImage(url);
+    this.map.set(url, { img, atime: performance.now() });
+    if (this.map.size > this.limit) this.evict();
+    return img;
+  }
+  evict() {
+    let oldestUrl = null, oldest = Infinity;
+    for (const [url, v] of this.map) if (v.atime < oldest) { oldest = v.atime; oldestUrl = url; }
+    if (oldestUrl) this.map.delete(oldestUrl);
+  }
+}
+
+
+
 gameTimeManager.getInstance().stop();

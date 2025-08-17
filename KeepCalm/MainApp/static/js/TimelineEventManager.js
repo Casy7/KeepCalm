@@ -76,7 +76,13 @@ export default class TimelineEventManager extends TimeObserver {
 
 	sendTimelineEvent(timelineEvent) {
 		if (timelineEvent.type == "message") {
-			typingIndicatorManager.startTyping(timelineEvent);
+			if (timelineEvent["typingDelayOverride"] == 0) {
+				eventRenderer.buildMessage(timelineEvent);
+				typingIndicatorManager.updateChatStatus(timelineEvent.chatId, true);
+			}
+			else {
+				typingIndicatorManager.startTyping(timelineEvent);
+			}
 		}
 		else {
 			eventRenderer.buildTemplate(timelineEvent);

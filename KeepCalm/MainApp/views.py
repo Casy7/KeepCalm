@@ -9,14 +9,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.generic import View
 
 
-from MainApp.models import User, Chat, ChatOptionNode, ChatMember, Character, Message, PlayerSession, PlayerSelectedNode, EntryNode, RouteImage
+from MainApp.models import User, Chat, ChatOptionNode, ChatMember, Character, Message, PlayerSession, PlayerSelectedNode, EntryNode, RouteImage, START_DATE
 from .utils import chat_structure_parser as csp
 from .utils.session_manager import SessionManager
 from .utils.db_helper import DBHelper as db
 from .utils.frontend_data_adapter import FrontendDataAdapter
 
 
-START_DATE = "2021-12-10T08:00:00+00:00"
+
 
 def extend_unique(lst, new_items):
     for item in new_items:
@@ -47,9 +47,9 @@ class MainChatPage(View):
 
 		player_selected_nodes = [selected_node.node for selected_node in PlayerSelectedNode.objects.filter(player=player_session)]
 		extend_unique(player_selected_nodes, db.update_selected_nodes(player_session, None, START_DATE))
-		
-		context["player_session"] = player_session
+
 		context["sessionCode"] = session_code
+		context["inGameTimeMs"] = player_session.in_game_time
 
 		# Characters
 		characters = []
@@ -63,6 +63,9 @@ class MainChatPage(View):
 		for node in player_selected_nodes:
 
 			timeline_events += db.get_timeline_events(node, player_session, START_DATE)
+
+		for timeline_event in timeline_events:
+			timeline_event["typingDelayOverride"] = 0
 
 		context["timelineEvents"] = json.dumps(timeline_events, cls=DjangoJSONEncoder)
 
@@ -429,6 +432,9 @@ class AjaxUserSelectsOption(View):
 			response["newTimelineEvents"] += db.get_timeline_events(node, player_session, START_DATE)
 
 		response['addedNodes'] = [FrontendDataAdapter.adapt_node(adapted_node, node_selected_time) for adapted_node in automatically_added_nodes]
+
+		player_session.in_game_time = data['nodeSelectedTimeMs']
+		player_session.save()
 		
 		response["result"] = "success"
 
@@ -440,4 +446,18 @@ class AjaxUserSelectsOption(View):
 
 class GetRouteImage(View):
 	def get(self, request, name):
-		return FileResponse(open(settings.MEDIA_ROOT + "/route_images/" + name, "rb"))
+		
+		route_image_exists = RouteImage.objects.filter(name=name).exists()
+
+		if not route_image_exists:
+			response = {
+				'result': 'error',
+				'errorMessage': 'Route image does not exist'
+			}
+			return  HttpResponse(
+			json.dumps(response),
+			content_type="application/json"
+		)
+
+		route_image = RouteImage.objects.get(name=name)
+		return FileResponse(route_image.file.open("rb"), content_type="image/svg+xml; charset=utf-8")

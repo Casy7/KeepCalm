@@ -4,6 +4,9 @@ from django.contrib.auth.models import User
 from django.utils.timezone import make_aware
 
 
+START_DATE = "2021-12-10T08:00:00+02:00"
+
+
 class Chat(models.Model):
 	name = models.CharField(max_length=150)
 	is_channel = models.BooleanField(default=False)
@@ -85,7 +88,7 @@ class PlayerSession(models.Model):
 class PlayerSelectedNode(models.Model):
 	player = models.ForeignKey(PlayerSession, on_delete=models.CASCADE)
 	node = models.ForeignKey(ChatOptionNode, on_delete=models.CASCADE)
-	time_selected = models.DateTimeField(default=make_aware(datetime.datetime.now()))
+	time_selected = models.DateTimeField(default=datetime.datetime.fromisoformat(START_DATE))
 
 	class Meta:
 		constraints = [
